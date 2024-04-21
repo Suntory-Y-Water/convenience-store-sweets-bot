@@ -4,8 +4,7 @@ import router from './api';
 
 const app = new Hono();
 app.use(prettyJSON());
-
-app.route('/', router);
+app.route('/api', router);
 
 export default {
   fetch: app.fetch,

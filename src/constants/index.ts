@@ -16,7 +16,7 @@ export const sevenElevenParams: ItemDetailSelector = {
   itemImageSelector: ' figure a img',
   itemImageSelectorAttribute: 'data-original',
   itemHrefSelector: ' figure a',
-  storeType: 'セブンイレブン',
+  storeType: 'SevenEleven',
 };
 
 export const familyMartParams: ItemDetailSelector = {
@@ -27,7 +27,7 @@ export const familyMartParams: ItemDetailSelector = {
   itemImageSelector: ' .ly-wrp-mod-infoset3-img img',
   itemImageSelectorAttribute: 'src',
   itemHrefSelector: ' .ly-mod-infoset3-link',
-  storeType: 'ファミリーマート',
+  storeType: 'FamilyMart',
 };
 
 export const lawsonParams: ItemDetailSelector = {
@@ -38,5 +38,5 @@ export const lawsonParams: ItemDetailSelector = {
   itemImageSelector: ' .img a img',
   itemImageSelectorAttribute: 'src',
   itemHrefSelector: ' .img a',
-  storeType: 'ローソン',
+  storeType: 'Lawson',
 };
