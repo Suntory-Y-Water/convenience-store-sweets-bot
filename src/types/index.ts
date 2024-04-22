@@ -34,3 +34,7 @@ export interface GetSweetsDetailParams extends ItemDetailSelector {
 }
 
 export const PREFIX = 'v1:sweets:';
+
+declare global {
+  function getMiniflareBindings(): Bindings;
+}
