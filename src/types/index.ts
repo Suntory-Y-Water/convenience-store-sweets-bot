@@ -1,18 +1,25 @@
 export type Bindings = {
-  HONO_KV: KVNamespace;
+  HONO_SWEETS: KVNamespace;
   CHANNEL_ACCESS_TOKEN: string;
   API_URL: string;
   BEARER_TOKEN: string;
 };
 
-export interface ItemDetail {
+export interface StoreType {
+  storeType: 'SevenEleven' | 'FamilyMart' | 'Lawson';
+}
+export interface ItemDetail extends StoreType {
   itemName: string;
   itemPrice: string;
   itemImage: string;
   itemHref: string;
 }
 
-export interface ItemDetailSelector {
+export interface ItemDetailRequest extends ItemDetail {
+  id: string;
+}
+
+export interface ItemDetailSelector extends StoreType {
   baseUrl: string;
   baseSelector: string;
   itemNameSelector: string;
@@ -20,7 +27,6 @@ export interface ItemDetailSelector {
   itemImageSelector: string;
   itemImageSelectorAttribute: 'data-original' | 'src';
   itemHrefSelector: string;
-  storeType: 'セブンイレブン' | 'ファミリーマート' | 'ローソン';
 }
 
 export interface GetSweetsDetailParams extends ItemDetailSelector {
@@ -28,3 +34,7 @@ export interface GetSweetsDetailParams extends ItemDetailSelector {
 }
 
 export const PREFIX = 'v1:sweets:';
+
+declare global {
+  function getMiniflareBindings(): Bindings;
+}

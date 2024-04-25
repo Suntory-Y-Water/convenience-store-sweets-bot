@@ -1,13 +1,19 @@
 {
   "scripts": {
     "dev": "wrangler dev src/index.ts",
-    "deploy": "wrangler deploy --minify src/index.ts"
+    "deploy": "wrangler deploy --minify src/index.ts",
+    "test": "jest --verbose --watch"
   },
   "dependencies": {
     "hono": "^4.2.5"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240403.0",
+    "@line/bot-sdk": "^9.2.0",
+    "@types/jest": "^29.5.12",
+    "esbuild-jest": "^0.5.0",
+    "jest": "^29.7.0",
+    "jest-environment-miniflare": "^2.14.2",
     "wrangler": "^3.47.0"
   }
 }

@@ -4,9 +4,13 @@ compatibility_date = "2023-12-01"
 # [vars]
 # MY_VAR = "my-variable"
 
-# [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+[[kv_namespaces]]
+binding = "HONO_SWEETS"
+id = "a5d85f3213b046e0b1f7b4c103ad3fd4"
+preview_id = "d1137077c5334e38b29e910f92f35a85"
+
+[triggers]
+crons = ["0 22 * * 2"]
 
 # [[r2_buckets]]
 # binding = "MY_BUCKET"
