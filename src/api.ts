@@ -1,67 +1,9 @@
 import { Hono } from 'hono';
-import { Bindings, GetSweetsDetailParams, ItemDetail } from './types';
-import {
-  getSweetsDetail,
-  fetchSweetsUrl,
-  createSweets,
-  getRandomSweets,
-  deleteAllSweets,
-} from './model';
-import * as constants from './constants';
+import { Bindings } from './types';
+import { getRandomSweets } from './model';
 import { WebhookEvent } from '@line/bot-sdk';
 
 const router = new Hono<{ Bindings: Bindings }>();
-router.get('/all', async (c) => {
-  const response = await fetchSweetsUrl(
-    constants.convenienceStoreItemUrls.sevenElevenWesternSweetsUrl,
-  );
-  const params: GetSweetsDetailParams = {
-    responseHtml: response,
-    ...constants.sevenElevenParams,
-  };
-
-  const data = await getSweetsDetail(params);
-
-  const sevenElevenResponse = await fetchSweetsUrl(
-    constants.convenienceStoreItemUrls.sevenElevenJapaneseSweetsUrl,
-  );
-  const sevenElevenJapaneseResponse: GetSweetsDetailParams = {
-    responseHtml: sevenElevenResponse,
-    ...constants.sevenElevenParams,
-  };
-
-  const sevenElevenJapaneseData = await getSweetsDetail(sevenElevenJapaneseResponse);
-
-  const familyMartResponse = await fetchSweetsUrl(constants.convenienceStoreItemUrls.familyMartUrl);
-  const familyMartParams: GetSweetsDetailParams = {
-    responseHtml: familyMartResponse,
-    ...constants.familyMartParams,
-  };
-  const familyMartData = await getSweetsDetail(familyMartParams);
-
-  const lawsonResponse = await fetchSweetsUrl(constants.convenienceStoreItemUrls.lawsonUrl);
-  const lawsonParams: GetSweetsDetailParams = {
-    responseHtml: lawsonResponse,
-    ...constants.lawsonParams,
-  };
-  const lawsonData = await getSweetsDetail(lawsonParams);
-
-  data.push(...sevenElevenJapaneseData, ...familyMartData, ...lawsonData);
-
-  return c.json(data);
-});
-
-router.get('/', async (c) => {
-  const sweets = await getRandomSweets(c.env.HONO_SWEETS, { storeType: 'FamilyMart' });
-  return c.json(sweets);
-});
-
-router.post('/', async (c) => {
-  await deleteAllSweets(c.env.HONO_SWEETS);
-  const params = await c.req.json<ItemDetail[]>();
-  await createSweets(c.env.HONO_SWEETS, params);
-  return new Response(null, { status: 201 });
-});
 
 router.post('/webhook', async (c) => {
   const data = await c.req.json();

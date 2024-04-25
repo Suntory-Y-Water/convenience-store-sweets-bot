@@ -1,4 +1,13 @@
-import { GetSweetsDetailParams, ItemDetail, ItemDetailRequest, PREFIX, StoreType } from './types';
+import {
+  Bindings,
+  GetSweetsDetailParams,
+  ItemDetail,
+  ItemDetailRequest,
+  PREFIX,
+  StoreType,
+} from './types';
+import * as constants from './constants';
+
 /**
  *
  * @description 商品ページにアクセスしてHTMLを取得する
@@ -12,7 +21,7 @@ export const fetchSweetsUrl = async (apiUrl: string): Promise<Response> => {
   });
 
   if (!response.ok) {
-    throw new Error('データの取得に失敗しました');
+    return new Response(null, { status: 404 });
   }
 
   // TODO: gloval.Response型になってしまうため、型を変換している
@@ -24,65 +33,72 @@ export const fetchSweetsUrl = async (apiUrl: string): Promise<Response> => {
  * @description 商品名、価格、画像、リンクを取得する
  */
 export const getSweetsDetail = async (params: GetSweetsDetailParams) => {
-  const results: ItemDetail[] = [];
-  let currentProduct: ItemDetail = {
-    itemName: '',
-    itemPrice: '',
-    itemImage: '',
-    itemHref: '',
-    storeType: params.storeType,
-  };
+  try {
+    const results: ItemDetail[] = [];
+    let currentProduct: ItemDetail = {
+      itemName: '',
+      itemPrice: '',
+      itemImage: '',
+      itemHref: '',
+      storeType: params.storeType,
+    };
 
-  const rewriter = new HTMLRewriter()
-    .on(params.baseSelector, {
-      element() {
-        if (currentProduct.itemName || currentProduct.itemPrice || currentProduct.itemImage) {
-          results.push(currentProduct);
-          currentProduct = {
-            itemName: '',
-            itemPrice: '',
-            itemImage: '',
-            itemHref: '',
-            storeType: params.storeType,
-          };
-        }
-      },
-    })
-    .on(params.baseSelector + params.itemNameSelector, {
-      text(text) {
-        currentProduct.itemName += text.text.trim();
-      },
-    })
-    .on(params.baseSelector + params.itemPriceSelector, {
-      text(text) {
-        currentProduct.itemPrice += text.text.replace(/\r\n\s+/g, '').trim();
-      },
-    })
-    .on(params.baseSelector + params.itemImageSelector, {
-      element(element) {
-        const image = element.getAttribute(params.itemImageSelectorAttribute);
-        if (!image) return;
+    const rewriter = new HTMLRewriter()
+      .on(params.baseSelector, {
+        element() {
+          if (currentProduct.itemName || currentProduct.itemPrice || currentProduct.itemImage) {
+            results.push(currentProduct);
+            currentProduct = {
+              itemName: '',
+              itemPrice: '',
+              itemImage: '',
+              itemHref: '',
+              storeType: params.storeType,
+            };
+          }
+        },
+      })
+      .on(params.baseSelector + params.itemNameSelector, {
+        text(text) {
+          currentProduct.itemName += text.text.trim();
+        },
+      })
+      .on(params.baseSelector + params.itemPriceSelector, {
+        text(text) {
+          currentProduct.itemPrice += text.text.replace(/\r\n\s+/g, '').trim();
+        },
+      })
+      .on(params.baseSelector + params.itemImageSelector, {
+        element(element) {
+          const image = element.getAttribute(params.itemImageSelectorAttribute);
+          if (!image) return;
 
-        currentProduct.itemImage =
-          params.storeType === 'SevenEleven' ? image : params.baseUrl + image;
-      },
-    })
-    .on(params.baseSelector + params.itemHrefSelector, {
-      element(element) {
-        const href = element.getAttribute('href');
-        if (!href) return;
-        currentProduct.itemHref = params.storeType === 'FamilyMart' ? href : params.baseUrl + href;
-      },
-    });
+          currentProduct.itemImage =
+            params.storeType === 'SevenEleven' ? image : params.baseUrl + image;
+        },
+      })
+      .on(params.baseSelector + params.itemHrefSelector, {
+        element(element) {
+          const href = element.getAttribute('href');
+          if (!href) return;
+          currentProduct.itemHref =
+            params.storeType === 'FamilyMart' ? href : params.baseUrl + href;
+        },
+      });
 
-  await rewriter.transform(params.responseHtml).arrayBuffer();
+    await rewriter.transform(params.responseHtml).arrayBuffer();
 
-  // 最後の商品が保存されていない場合はここで保存
-  if (currentProduct.itemName || currentProduct.itemPrice || currentProduct.itemImage) {
-    results.push(currentProduct);
+    // 最後の商品が保存されていない場合はここで保存
+    if (currentProduct.itemName || currentProduct.itemPrice || currentProduct.itemImage) {
+      results.push(currentProduct);
+    }
+
+    return results;
+  } catch (error) {
+    console.error(`スイーツの情報取得に失敗しました : ${error}`);
+    console.error(`取得に失敗したスイーツ情報 : ${params}`);
+    return [];
   }
-
-  return results;
 };
 
 export const createSweets = async (KV: KVNamespace, params: ItemDetail[]) => {
@@ -141,4 +157,44 @@ export const getRandomSweets = async (KV: KVNamespace, storeType: StoreType) => 
   }
 
   return sweets;
+};
+
+export const doSomeTaskOnASchedule = async (env: Bindings) => {
+  try {
+    const urlsParams = [
+      {
+        url: constants.convenienceStoreItemUrls.sevenElevenWesternSweetsUrl,
+        params: constants.sevenElevenParams,
+      },
+      {
+        url: constants.convenienceStoreItemUrls.sevenElevenJapaneseSweetsUrl,
+        params: constants.sevenElevenParams,
+      },
+      { url: constants.convenienceStoreItemUrls.familyMartUrl, params: constants.familyMartParams },
+      { url: constants.convenienceStoreItemUrls.lawsonUrl, params: constants.lawsonParams },
+    ];
+    let allSweetsData: ItemDetail[] = [];
+
+    // 全てのURLに対して順番にデータを取得
+    for (const { url, params } of urlsParams) {
+      const response = await fetchSweetsUrl(url);
+      const sweetsDetailParams = {
+        responseHtml: response,
+        ...params,
+      };
+      const sweetsData = await getSweetsDetail(sweetsDetailParams);
+      allSweetsData.push(...sweetsData);
+    }
+
+    // KVに保存する前に既存のデータを全て削除
+    await deleteAllSweets(env.HONO_SWEETS);
+
+    // 新しいスイーツデータをKVに保存
+    await createSweets(env.HONO_SWEETS, allSweetsData);
+
+    return new Response(null, { status: 201 });
+  } catch (err) {
+    console.error(err);
+    return;
+  }
 };
