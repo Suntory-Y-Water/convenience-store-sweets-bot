@@ -37,7 +37,7 @@ const textEventHandler = async (
 
   const { replyToken } = event;
   const receivedText = event.message.text;
-  let messages = [];
+  const messages = [];
   let sweets;
 
   switch (receivedText) {

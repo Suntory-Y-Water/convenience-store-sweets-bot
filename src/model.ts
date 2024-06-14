@@ -12,7 +12,7 @@ import * as constants from './constants';
  *
  * @description 商品ページにアクセスしてHTMLを取得する
  */
-export const fetchSweetsUrl = async (apiUrl: string): Promise<Response> => {
+export const fetchSweetsUrl = async (apiUrl: string) => {
   const response = await fetch(apiUrl, {
     headers: {
       'User-Agent':
@@ -24,7 +24,7 @@ export const fetchSweetsUrl = async (apiUrl: string): Promise<Response> => {
     return new Response(null, { status: 404 });
   }
 
-  // TODO: gloval.Response型になってしまうため、型を変換している
+  // TODO: global.Response型になってしまうため、型を変換している
   return response as unknown as Response;
 };
 
