@@ -2,7 +2,8 @@
   "scripts": {
     "dev": "wrangler dev src/index.ts",
     "deploy": "wrangler deploy --minify src/index.ts",
-    "test": "jest --verbose --watch",
+    "test": "jest --verbose",
+    "watch:test": "jest --verbose --watch",
     "lint": "eslint src",
     "fix:lint": "eslint src --fix"
   },
