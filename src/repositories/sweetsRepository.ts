@@ -18,7 +18,7 @@ export class SweetsRepository implements ISweetsRepository {
     const kvList: T[] = [];
 
     if (list.keys.length === 0) {
-      console.error('No data found');
+      console.log(`fetchItemsKVStore no data found params : ${params}${prefixParam}`);
       return null;
     }
 
@@ -28,6 +28,7 @@ export class SweetsRepository implements ISweetsRepository {
         kvList.push(value);
       }
     }
+    kvList.sort((a: any, b: any) => (a.id > b.id ? 1 : -1));
     return kvList;
   };
 
