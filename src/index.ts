@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import { doSomeTaskOnASchedule } from './model';
 import { Bindings } from './types';
 import { DIContainer } from './containers/diContainer';
 import { DependencyTypes, diContainer } from './containers/diConfig';
@@ -10,6 +9,7 @@ import {
   WebhookRequestBody,
 } from '@line/bot-sdk';
 import { Constants } from './constants';
+import { Sweets } from './model/sweets';
 
 const app = new Hono<{
   Variables: {
@@ -74,6 +74,7 @@ app.post('/webhook', async (c) => {
           accessToken,
         );
         return replyMessage;
+        // TODO: エラーハンドリング
       } catch (err: unknown) {
         if (err instanceof Error) {
           console.error(err);
@@ -91,8 +92,54 @@ app.post('/webhook', async (c) => {
   return c.json({ message: 'ok' }, 200);
 });
 
+const scheduledEvent = async (env: Bindings) => {
+  const di = diContainer;
+  const sweetsService = di.get('SweetsService');
+  const sweetsApiService = di.get('SweetsApiService');
+  const urlsParams = [
+    {
+      url: Constants.ConvenienceStoreItemUrl.sevenElevenWesternSweetsUrl,
+      params: Constants.ConvenienceStoreDetailParams.SEVEN_ELEVEN,
+    },
+    {
+      url: Constants.ConvenienceStoreItemUrl.sevenElevenJapaneseSweetsUrl,
+      params: Constants.ConvenienceStoreDetailParams.SEVEN_ELEVEN,
+    },
+    {
+      url: Constants.ConvenienceStoreItemUrl.familyMartUrl,
+      params: Constants.ConvenienceStoreDetailParams.FAMILY_MART,
+    },
+    {
+      url: Constants.ConvenienceStoreItemUrl.lawsonUrl,
+      params: Constants.ConvenienceStoreDetailParams.LAWSON,
+    },
+  ];
+  const allSweetsData: Sweets[] = [];
+  const headers = {
+    'User-Agent': Constants.USER_AGENT,
+  };
+  // 全てのURLに対して順番にデータを取得
+  for (const { url, params } of urlsParams) {
+    const response = await sweetsApiService.fetchSweetsUrl(url, headers);
+    const sweetsDetailParams = {
+      responseHtml: response,
+      ...params,
+    };
+    const sweetsData = await sweetsApiService.getSweetsDetail(sweetsDetailParams);
+    allSweetsData.push(...sweetsData);
+  }
+
+  // KVに保存する前に既存のデータを全て削除
+  await sweetsService.deleteSweets(env.HONO_SWEETS, Constants.PREFIX);
+
+  // 新しいスイーツデータをKVに保存
+  await sweetsService.createSweets(env.HONO_SWEETS, Constants.PREFIX, allSweetsData);
+
+  return new Response(null, { status: 201 });
+};
+
 const scheduled: ExportedHandlerScheduledHandler<Bindings> = async (event, env, ctx) => {
-  ctx.waitUntil(doSomeTaskOnASchedule(env));
+  ctx.waitUntil(scheduledEvent(env));
 };
 
 export default {
