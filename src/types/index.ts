@@ -1,12 +1,12 @@
 export type Bindings = {
-  HONO_SWEETS: KVNamespace;
-  CHANNEL_ACCESS_TOKEN: string;
-  API_URL: string;
-  BEARER_TOKEN: string;
+  readonly HONO_SWEETS: KVNamespace;
+  readonly CHANNEL_ACCESS_TOKEN: string;
+  readonly API_URL: string;
+  readonly BEARER_TOKEN: string;
 };
 
 export interface StoreType {
-  storeType: 'SevenEleven' | 'FamilyMart' | 'Lawson';
+  readonly storeType: 'SevenEleven' | 'FamilyMart' | 'Lawson';
 }
 export interface ItemDetail extends StoreType {
   itemName: string;
@@ -15,22 +15,27 @@ export interface ItemDetail extends StoreType {
   itemHref: string;
 }
 
+export interface DefaultMessages {
+  readonly type: string;
+  readonly text: string;
+}
+
 export interface ItemDetailRequest extends ItemDetail {
-  id: string;
+  readonly id: string;
 }
 
 export interface ItemDetailSelector extends StoreType {
-  baseUrl: string;
-  baseSelector: string;
-  itemNameSelector: string;
-  itemPriceSelector: string;
-  itemImageSelector: string;
-  itemImageSelectorAttribute: 'data-original' | 'src';
-  itemHrefSelector: string;
+  readonly baseUrl: string;
+  readonly baseSelector: string;
+  readonly itemNameSelector: string;
+  readonly itemPriceSelector: string;
+  readonly itemImageSelector: string;
+  readonly itemImageSelectorAttribute: 'data-original' | 'src';
+  readonly itemHrefSelector: string;
 }
 
 export interface GetSweetsDetailParams extends ItemDetailSelector {
-  responseHtml: Response;
+  readonly responseHtml: string;
 }
 
 export const PREFIX = 'v1:sweets:';

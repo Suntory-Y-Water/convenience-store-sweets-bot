@@ -1,10 +1,5 @@
 # convenience-store-sweets-bot
 
-```
-npm install
-npm run dev
-```
+## 概要
 
-```
-npm run deploy
-```
+大手コンビニ3社のスイーツ情報をランダムに表示するLINE BOT
