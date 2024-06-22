@@ -2,9 +2,14 @@ import { ISweetsRepository } from '../interfaces/sweetsInterface';
 import { Sweets } from '../model/sweets';
 
 export interface ISweetsService {
-  getRandomSweets(KV: KVNamespace, storeType: string, prefix: string): Promise<Sweets | null>;
+  getRandomSweets(
+    KV: KVNamespace,
+    storeType: string,
+    prefix: string,
+  ): Promise<Sweets | null>;
   createSweets(KV: KVNamespace, prefix: string, sweets: Sweets[]): Promise<void>;
   deleteSweets(KV: KVNamespace, prefix: string): Promise<void>;
+  switchStoreType(receivedMessage: string): string | null;
 }
 
 export class SweetsService implements ISweetsService {
@@ -12,6 +17,19 @@ export class SweetsService implements ISweetsService {
   constructor(sweetsRepository: ISweetsRepository) {
     this.sweetsRepository = sweetsRepository;
   }
+
+  switchStoreType = (receivedMessage: string): string | null => {
+    switch (receivedMessage) {
+      case 'セブンのスイーツ':
+        return 'SevenEleven';
+      case 'ファミマのスイーツ':
+        return 'FamilyMart';
+      case 'ローソンのスイーツ':
+        return 'Lawson';
+      default:
+        return null;
+    }
+  };
 
   getRandomSweets = async (
     KV: KVNamespace,
@@ -42,7 +60,11 @@ export class SweetsService implements ISweetsService {
     return this.sweetsRepository.deleteItemsKVStore(KV, prefix);
   };
 
-  createSweets = async (KV: KVNamespace, prefix: string, sweets: Sweets[]): Promise<void> => {
+  createSweets = async (
+    KV: KVNamespace,
+    prefix: string,
+    sweets: Sweets[],
+  ): Promise<void> => {
     sweets.map(async (item) => {
       const id = item.storeType + crypto.randomUUID();
       const sweetsData: Sweets = {
@@ -53,7 +75,11 @@ export class SweetsService implements ISweetsService {
         itemHref: item.itemHref,
         storeType: item.storeType,
       };
-      await this.sweetsRepository.putItemKVStore<Sweets>(KV, `${prefix}${id}`, sweetsData);
+      await this.sweetsRepository.putItemKVStore<Sweets>(
+        KV,
+        `${prefix}${id}`,
+        sweetsData,
+      );
     });
     return;
   };

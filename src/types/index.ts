@@ -15,6 +15,11 @@ export interface ItemDetail extends StoreType {
   itemHref: string;
 }
 
+export interface DefaultMessages {
+  readonly type: string;
+  readonly text: string;
+}
+
 export interface ItemDetailRequest extends ItemDetail {
   readonly id: string;
 }
@@ -30,7 +35,7 @@ export interface ItemDetailSelector extends StoreType {
 }
 
 export interface GetSweetsDetailParams extends ItemDetailSelector {
-  readonly responseHtml: Response;
+  readonly responseHtml: string;
 }
 
 export const PREFIX = 'v1:sweets:';

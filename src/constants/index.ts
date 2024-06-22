@@ -18,41 +18,50 @@ export class Constants {
     lawsonUrl: 'https://www.lawson.co.jp/recommend/original/dessert/',
   };
 
-  static readonly ConvenienceStoreDetailParams: Record<string, ItemDetailSelector> = {
-    SEVEN_ELEVEN: {
-      baseUrl: 'https://www.sej.co.jp',
-      baseSelector: '.list_inner',
-      itemNameSelector: ' .item_ttl a',
-      itemPriceSelector: ' .item_price p',
-      itemImageSelector: ' figure a img',
-      itemImageSelectorAttribute: 'data-original',
-      itemHrefSelector: ' figure a',
-      storeType: 'SevenEleven',
-    },
-    FAMILY_MART: {
-      baseUrl: 'https://www.family.co.jp',
-      baseSelector: '.ly-mod-layout-clm',
-      itemNameSelector: ' .ly-mod-infoset3-name',
-      itemPriceSelector: ' .ly-mod-infoset3-price',
-      itemImageSelector: ' .ly-wrp-mod-infoset3-img img',
-      itemImageSelectorAttribute: 'src',
-      itemHrefSelector: ' .ly-mod-infoset3-link',
-      storeType: 'FamilyMart',
-    },
-    LAWSON: {
-      baseUrl: 'https://www.lawson.co.jp',
-      baseSelector: 'ul.col-4 li',
-      itemNameSelector: ' .ttl',
-      itemPriceSelector: ' .price span',
-      itemImageSelector: ' .img a img',
-      itemImageSelectorAttribute: 'src',
-      itemHrefSelector: ' .img a',
-      storeType: 'Lawson',
-    },
+  static readonly SEVEN_ELEVEN: ItemDetailSelector = {
+    baseUrl: 'https://www.sej.co.jp',
+    baseSelector: '.list_inner',
+    itemNameSelector: ' .item_ttl a',
+    itemPriceSelector: ' .item_price p',
+    itemImageSelector: ' figure a img',
+    itemImageSelectorAttribute: 'data-original',
+    itemHrefSelector: ' figure a',
+    storeType: 'SevenEleven',
+  };
+
+  static readonly FAMILY_MART: ItemDetailSelector = {
+    baseUrl: 'https://www.family.co.jp',
+    baseSelector: '.ly-mod-layout-clm',
+    itemNameSelector: ' .ly-mod-infoset3-name',
+    itemPriceSelector: ' .ly-mod-infoset3-price',
+    itemImageSelector: ' .ly-wrp-mod-infoset3-img img',
+    itemImageSelectorAttribute: 'src',
+    itemHrefSelector: ' .ly-mod-infoset3-link',
+    storeType: 'FamilyMart',
+  };
+
+  static readonly LAWSON: ItemDetailSelector = {
+    baseUrl: 'https://www.lawson.co.jp',
+    baseSelector: 'ul.col-4 li',
+    itemNameSelector: ' .ttl',
+    itemPriceSelector: ' .price span',
+    itemImageSelector: ' .img a img',
+    itemImageSelectorAttribute: 'src',
+    itemHrefSelector: ' .img a',
+    storeType: 'Lawson',
+  };
+  static readonly ConvenienceStoreDetailParams = {
+    SEVEN_ELEVEN: Constants.SEVEN_ELEVEN,
+    FAMILY_MART: Constants.FAMILY_MART,
+    LAWSON: Constants.LAWSON,
   };
 
   /**
    * v1:sweets:
    */
   static readonly PREFIX = 'v1:sweets:';
+
+  /** userAgent header部に何もつけないと各社HPの情報を取得しようとしたとき403Forbiddenになるため使用 */
+  static readonly USER_AGENT =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36';
 }

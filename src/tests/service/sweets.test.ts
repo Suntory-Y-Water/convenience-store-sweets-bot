@@ -94,7 +94,11 @@ describe('sweets repository tests', () => {
     await sweetsService.deleteSweets(env.HONO_SWEETS, prefix);
 
     // assert
-    const result = await sweetsService.getRandomSweets(env.HONO_SWEETS, storeType, prefix);
+    const result = await sweetsService.getRandomSweets(
+      env.HONO_SWEETS,
+      storeType,
+      prefix,
+    );
     expect(result).toBeNull();
   });
 

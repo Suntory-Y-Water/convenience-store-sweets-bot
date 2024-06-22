@@ -28,6 +28,7 @@ export class SweetsRepository implements ISweetsRepository {
         kvList.push(value);
       }
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     kvList.sort((a: any, b: any) => (a.id > b.id ? 1 : -1));
     return kvList;
   };
