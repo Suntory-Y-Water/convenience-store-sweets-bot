@@ -1,5 +1,8 @@
 export class DIContainer<DependencyTypes> {
-  private registry = new Map<keyof DependencyTypes, DependencyTypes[keyof DependencyTypes]>();
+  private registry = new Map<
+    keyof DependencyTypes,
+    DependencyTypes[keyof DependencyTypes]
+  >();
 
   register<Key extends keyof DependencyTypes, Args extends unknown[]>(
     key: Key,

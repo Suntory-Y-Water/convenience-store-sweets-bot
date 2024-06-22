@@ -27,6 +27,10 @@ diContainer.register('SweetsRepository', SweetsRepository);
 diContainer.register('SweetsService', SweetsService, diContainer.get('SweetsRepository'));
 
 diContainer.register('SweetsApiRepository', SweetsApiRepository);
-diContainer.register('SweetsApiService', SweetsApiService, diContainer.get('SweetsApiRepository'));
+diContainer.register(
+  'SweetsApiService',
+  SweetsApiService,
+  diContainer.get('SweetsApiRepository'),
+);
 
 export { diContainer };

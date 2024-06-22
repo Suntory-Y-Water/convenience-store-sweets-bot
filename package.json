@@ -6,7 +6,8 @@
     "test": "jest --verbose",
     "watch:test": "jest --verbose --watch",
     "lint": "eslint src",
-    "fix:lint": "eslint src --fix"
+    "fix:lint": "eslint src --fix",
+    "fix:prettier": "prettier --write src/**/*.ts"
   },
   "dependencies": {
     "hono": "^4.2.5"
