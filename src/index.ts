@@ -23,6 +23,31 @@ app.use('*', (c, next) => {
   return next();
 });
 
+app.get('/random', async (c) => {
+  const query = c.req.query('store_type');
+  if (!query) {
+    return c.json({ message: 'store_typeを指定してください' }, 400);
+  }
+
+  // store_typeの値がSevenEleven, FamilyMart, Lawsonのいずれかでない場合はエラーを返す
+  if (query !== 'SevenEleven' && query !== 'FamilyMart' && query !== 'Lawson') {
+    return c.json({ message: 'store_typeの値が不正です' }, 400);
+  }
+
+  const di = c.get('diContainer');
+  const sweetsService = di.get('SweetsService');
+  const data = await sweetsService.getRandomSweets(
+    c.env.HONO_SWEETS,
+    query,
+    Constants.PREFIX,
+  );
+
+  if (!data) {
+    return c.json({ message: 'データが存在しません' }, 404);
+  }
+  return c.json(data, 200);
+});
+
 app.post('/webhook', async (c) => {
   const data = await c.req.json<WebhookRequestBody>();
   const events = data.events;
@@ -43,11 +68,12 @@ app.post('/webhook', async (c) => {
           const textMessage = lineService.createTextMessage(
             Constants.MessageConstants.DEFAULT_MESSAGE,
           );
-          return await lineService.replyMessage<TextMessage>(
+          await lineService.replyMessage<TextMessage>(
             textMessage,
             webhookEventHandlers.replyToken,
             accessToken,
           );
+          return;
         }
 
         const sweets = await sweetsService.getRandomSweets(
@@ -60,31 +86,25 @@ app.post('/webhook', async (c) => {
           const textMessage = lineService.createTextMessage(
             Constants.MessageConstants.NOT_SWEETS_MESSAGE,
           );
-          return await lineService.replyMessage<TextMessage>(
+          await lineService.replyMessage<TextMessage>(
             textMessage,
             webhookEventHandlers.replyToken,
             accessToken,
           );
+          return;
         }
 
         const flexMessage = lineService.createFlexMessage(sweets);
-        const replyMessage = await lineService.replyMessage<FlexMessage>(
+        await lineService.replyMessage<FlexMessage>(
           flexMessage,
           webhookEventHandlers.replyToken,
           accessToken,
         );
-        return replyMessage;
-        // TODO: エラーハンドリング
       } catch (err: unknown) {
         if (err instanceof Error) {
           console.error(err);
         }
-        return c.json(
-          {
-            status: 'error',
-          },
-          500,
-        );
+        return c.json({ status: 'error' }, 500);
       }
     }),
   );

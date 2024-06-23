@@ -37,17 +37,21 @@ export class SweetsService implements ISweetsService {
     prefix: string,
   ): Promise<Sweets | null> => {
     try {
-      const sweetsList = await this.sweetsRepository.fetchItemsKVStore<Sweets>(
+      const lists = await this.sweetsRepository.fetchItemKVStoreKey(
         KV,
         storeType,
         prefix,
       );
-      if (!sweetsList) {
+
+      if (lists.keys.length === 0) {
         return null;
       }
-      // sweetsListの中からランダムに1つ選ぶ
-      const randomIndex = Math.floor(Math.random() * sweetsList.length);
-      return sweetsList[randomIndex];
+
+      // キーの中からランダムに1つ選ぶ
+      const randomIndex = Math.floor(Math.random() * lists.keys.length);
+      const randomKeyName = lists.keys[randomIndex].name;
+
+      return await this.sweetsRepository.fetchItemKVStoreValue<Sweets>(KV, randomKeyName);
     } catch (error) {
       if (error instanceof Error) {
         console.error(`スイーツの情報取得に失敗しました : ${error.message}`);
@@ -65,7 +69,7 @@ export class SweetsService implements ISweetsService {
     prefix: string,
     sweets: Sweets[],
   ): Promise<void> => {
-    sweets.map(async (item) => {
+    const promises = sweets.map(async (item) => {
       const id = item.storeType + crypto.randomUUID();
       const sweetsData: Sweets = {
         id: id,
@@ -81,6 +85,6 @@ export class SweetsService implements ISweetsService {
         sweetsData,
       );
     });
-    return;
+    await Promise.all(promises);
   };
 }
