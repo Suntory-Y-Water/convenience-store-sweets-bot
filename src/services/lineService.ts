@@ -1,7 +1,7 @@
 import { FlexMessage, TextMessage, WebhookEvent } from '@line/bot-sdk';
-import { ILineRepository } from '../interfaces/lineInterface';
 import { LineErrorMessage, MessageEventHandler, SentMessage } from '../model/line';
 import { Sweets } from '../model/sweets';
+import { ILineRepository } from '../repositories/lineRepository';
 
 export interface ILineService {
   replyMessage<T>(

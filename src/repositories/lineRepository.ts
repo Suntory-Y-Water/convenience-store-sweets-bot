@@ -1,7 +1,6 @@
-import { ILineRepository } from '../interfaces/lineInterface';
 import { LineErrorMessage, SentMessage } from '../model/line';
 
-export class LineRepository implements ILineRepository {
+export interface ILineRepository {
   /**
    * @description LINEのメッセージを送信する
    * @param {T} message 送信するメッセージ
@@ -9,6 +8,14 @@ export class LineRepository implements ILineRepository {
    * @param {string} accessToken LINE APIのアクセストークン
    * @memberof LineRepository
    */
+  replyMessage<T>(
+    message: T,
+    replyToken: string,
+    accessToken: string,
+  ): Promise<SentMessage | LineErrorMessage>;
+}
+
+export class LineRepository implements ILineRepository {
   replyMessage = async <T>(
     message: T,
     replyToken: string,

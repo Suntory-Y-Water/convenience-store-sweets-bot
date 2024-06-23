@@ -1,6 +1,6 @@
-import { ISweetsApiRepository } from '../interfaces/sweetsApiInterface';
 import { Sweets } from '../model/sweets';
 import { GetSweetsDetailParams } from '../model/sweetsApi';
+import { ISweetsApiRepository } from '../repositories/sweetsApiRepository';
 
 export interface ISweetsApiService {
   fetchSweetsUrl(url: string, headers?: Record<string, string>): Promise<string>;

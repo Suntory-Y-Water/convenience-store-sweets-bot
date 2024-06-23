@@ -1,5 +1,5 @@
-import { ISweetsRepository } from '../interfaces/sweetsInterface';
 import { Sweets } from '../model/sweets';
+import { ISweetsRepository } from '../repositories/sweetsRepository';
 
 export interface ISweetsService {
   getRandomSweets(
