@@ -122,4 +122,15 @@ describe('sweetsApi tests', () => {
       expect(item).toHaveProperty('storeType');
     });
   });
+
+  test('parseName test encode ', () => {
+    // arrange
+    const text = 'ダブルクリームサンド（ホイップ&amp;カスタード）';
+
+    // act
+    const result = sweetsApiService.parseName(text);
+
+    // assert
+    expect(result).toBe('ダブルクリームサンド（ホイップ&カスタード）');
+  });
 });

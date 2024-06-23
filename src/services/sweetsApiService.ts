@@ -4,6 +4,13 @@ import { GetSweetsDetailParams } from '../model/sweetsApi';
 
 export interface ISweetsApiService {
   fetchSweetsUrl(url: string, headers?: Record<string, string>): Promise<string>;
+  /**
+   *
+   * @description htmlのテキストをパースして商品名を取得する
+   * @param {string} text
+   * @return {*}  {string}
+   * @memberof SweetsApiService
+   */
   parseName(text: string): string;
   parsePrice(text: string): string;
   parseImage(element: Element, baseUrl: string, storeType: string): string;
@@ -25,7 +32,13 @@ export class SweetsApiService implements ISweetsApiService {
   };
 
   parseName(text: string): string {
-    return text.trim();
+    return text
+      .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&nbsp;/g, ' ')
+      .trim();
   }
 
   parsePrice(text: string): string {
