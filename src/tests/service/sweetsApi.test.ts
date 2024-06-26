@@ -11,6 +11,10 @@ describe('sweetsApi tests', () => {
     sweetsApiService = diContainer.get('SweetsApiService');
   });
 
+  const testLoadHtml = (fileName: string) => {
+    return readFileSync(resolve('./src/tests/html', fileName), 'utf8');
+  };
+
   test('fetchSweetsUrlでテキスト形式のデータが取得できる', async () => {
     // arrange
     const url = 'https://i-scream.ayasnppk00.workers.dev/';
@@ -29,10 +33,7 @@ describe('sweetsApi tests', () => {
   test('getSweetsDetail sevenEleven HTML test', async () => {
     // arrange
     const params = Constants.ConvenienceStoreDetailParams.SEVEN_ELEVEN;
-    const sevenElevenHtml = readFileSync(
-      resolve('./src/tests/html', 'sevenEleven.html'),
-      'utf8',
-    );
+    const sevenElevenHtml = testLoadHtml('sevenEleven.html');
     const sweetsDetailParams = {
       responseHtml: sevenElevenHtml,
       ...params,
@@ -40,9 +41,22 @@ describe('sweetsApi tests', () => {
 
     // act
     const data = await sweetsApiService.getSweetsDetail(sweetsDetailParams);
-    console.log(data[0]);
     // assert
     expect(data).toEqual(expect.any(Array));
+
+    // 新商品だったらmetadataが空ではないことを期待する
+    expect(data[0]).toEqual({
+      itemName: 'ほろにがコーヒーゼリー＆パンナコッタ',
+      itemPrice: '250円（税込270円）',
+      itemImage:
+        'https://img.7api-01.dp1.sej.co.jp/item-image/111506/AEAD253BF47F7395A68C0E8DFD14EA31.jpg',
+      itemHref: 'https://www.sej.co.jp/products/a/item/111506/kanto/',
+      storeType: 'SevenEleven',
+      metadata: {
+        isNew: true,
+        releasePeriod: 'this_week',
+      },
+    });
 
     // テストデータの構造が正しいことを期待する
     data.forEach((item) => {
@@ -72,10 +86,7 @@ describe('sweetsApi tests', () => {
   test('getSweetsDetail FamilyMart HTML test', async () => {
     // arrange
     const params = Constants.ConvenienceStoreDetailParams.FAMILY_MART;
-    const familymartHtml = readFileSync(
-      resolve('./src/tests/html', 'familymart.html'),
-      'utf8',
-    );
+    const familymartHtml = testLoadHtml('familymart.html');
     const sweetsDetailParams = {
       responseHtml: familymartHtml,
       ...params,
@@ -83,7 +94,26 @@ describe('sweetsApi tests', () => {
 
     // act
     const data = await sweetsApiService.getSweetsDetail(sweetsDetailParams);
-    console.log(data[0]);
+
+    // 新商品かつ来週発売だったら、'next_week'になることを期待する
+    expect(data[0]).toEqual({
+      itemName: '珈琲ゼリー',
+      itemPrice: '204円 （税込220円）',
+      itemImage: 'https://www.family.co.jp/content/dam/family/goods/1945010.jpg',
+      itemHref: 'https://www.family.co.jp/goods/dessert/1945010.html',
+      storeType: 'FamilyMart',
+      metadata: { isNew: true, releasePeriod: 'next_week' },
+    });
+
+    // 新商品かつ来週発売だったら、'this_week'になることを期待する
+    expect(data[2]).toEqual({
+      itemName: 'くりーむ抹茶パフェ',
+      itemPrice: '297円 （税込320円）',
+      itemImage: 'https://www.family.co.jp/content/dam/family/goods/1940459.jpg',
+      itemHref: 'https://www.family.co.jp/goods/dessert/1940459.html',
+      storeType: 'FamilyMart',
+      metadata: { isNew: true, releasePeriod: 'this_week' },
+    });
     // assert
     expect(data).toEqual(expect.any(Array));
 
@@ -100,7 +130,7 @@ describe('sweetsApi tests', () => {
   test('getSweetsDetail lawson HTML test', async () => {
     // arrange
     const params = Constants.ConvenienceStoreDetailParams.LAWSON;
-    const lawsonHtml = readFileSync(resolve('./src/tests/html', 'lawson.html'), 'utf8');
+    const lawsonHtml = testLoadHtml('lawson.html');
     const sweetsDetailParams = {
       responseHtml: lawsonHtml,
       ...params,
@@ -109,7 +139,6 @@ describe('sweetsApi tests', () => {
     // act
     const data = await sweetsApiService.getSweetsDetail(sweetsDetailParams);
 
-    console.log(data[0]);
     // assert
     expect(data).toEqual(expect.any(Array));
 
@@ -132,5 +161,40 @@ describe('sweetsApi tests', () => {
 
     // assert
     expect(result).toBe('ダブルクリームサンド（ホイップ&カスタード）');
+  });
+
+  test('isNewProductTextString tests', () => {
+    // arrange
+    const parsingText = '2024年06月18日（火）以降順次発売';
+
+    // act
+    expect(sweetsApiService.isNewProductTextString(parsingText)).toEqual({
+      isNew: true,
+      releasePeriod: 'this_week',
+    });
+
+    // arrange
+    const parsingThisText = '新発売';
+
+    // act
+    expect(sweetsApiService.isNewProductTextString(parsingThisText)).toEqual({
+      isNew: true,
+      releasePeriod: 'this_week',
+    });
+
+    // arrange
+    const parsingNewText = '6月25日発売';
+
+    // act
+    expect(sweetsApiService.isNewProductTextString(parsingNewText)).toEqual({
+      isNew: true,
+      releasePeriod: 'next_week',
+    });
+
+    // arrange
+    const noText = '';
+
+    // act
+    expect(sweetsApiService.isNewProductTextString(noText)).toEqual({});
   });
 });
