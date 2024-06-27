@@ -66,8 +66,7 @@ describe('sweets repository tests', () => {
     // act
     const lists = await sweetsRepository.fetchItemKVStoreKey(
       env.HONO_SWEETS,
-      storeType,
-      prefix,
+      prefix + storeType,
     );
 
     // assert

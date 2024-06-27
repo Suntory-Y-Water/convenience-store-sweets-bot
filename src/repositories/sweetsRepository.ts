@@ -19,13 +19,11 @@ export interface ISweetsRepository {
    *
    * @description KVストアからprefixが一致するkeyを取得する。
    * @param {KVNamespace<string>} KV
-   * @param {string} prefixParam
-   * @param {string} params
+   * @param {string} params KVストアのキー
    * @memberof SweetsRepository
    */
   fetchItemKVStoreKey(
     KV: KVNamespace,
-    prefix: string,
     params: string,
   ): Promise<KVNamespaceListResult<unknown, string>>;
   /**
@@ -41,10 +39,9 @@ export interface ISweetsRepository {
 export class SweetsRepository implements ISweetsRepository {
   fetchItemKVStoreKey = async (
     KV: KVNamespace<string>,
-    prefixParam: string,
     params: string,
   ): Promise<KVNamespaceListResult<unknown, string>> => {
-    const prefix = `${params}${prefixParam}`;
+    const prefix = params;
     return await KV.list({ prefix });
   };
 
