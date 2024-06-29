@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { Bindings } from './types';
+import { Bindings, isLineErrorMessage } from './types';
 import { DIContainer } from './containers/diContainer';
 import { DependencyTypes, diContainer } from './containers/diConfig';
 import {
@@ -23,6 +23,31 @@ app.use('*', (c, next) => {
   return next();
 });
 
+app.get('/random', async (c) => {
+  const query = c.req.query('store_type');
+  if (!query) {
+    return c.json({ message: 'store_typeを指定してください' }, 400);
+  }
+
+  // store_typeの値がSevenEleven, FamilyMart, Lawsonのいずれかでない場合はエラーを返す
+  if (query !== 'SevenEleven' && query !== 'FamilyMart' && query !== 'Lawson') {
+    return c.json({ message: 'store_typeの値が不正です' }, 400);
+  }
+
+  const di = c.get('diContainer');
+  const sweetsService = di.get('SweetsService');
+  const data = await sweetsService.getRandomSweets(
+    c.env.HONO_SWEETS,
+    query,
+    Constants.PREFIX,
+  );
+
+  if (!data) {
+    return c.json({ message: 'データが存在しません' }, 404);
+  }
+  return c.json(data, 200);
+});
+
 app.post('/webhook', async (c) => {
   const data = await c.req.json<WebhookRequestBody>();
   const events = data.events;
@@ -35,56 +60,100 @@ app.post('/webhook', async (c) => {
     events.map(async (event: WebhookEvent) => {
       try {
         const webhookEventHandlers = await lineService.textEventHandler(event);
+
         // ここでSweets情報を取得する処理を行う。取得したメッセージから店舗情報を取得する
-        const storeType = sweetsService.switchStoreType(webhookEventHandlers.message);
+        const messageDetail = lineService.switchStoreType(webhookEventHandlers.message);
 
         // メッセージに店舗情報を含まない場合は、デフォルトメッセージを返す
-        if (!storeType) {
+        if (!messageDetail.store) {
           const textMessage = lineService.createTextMessage(
             Constants.MessageConstants.DEFAULT_MESSAGE,
           );
-          return await lineService.replyMessage<TextMessage>(
+          await lineService.replyMessage<TextMessage>(
             textMessage,
+            webhookEventHandlers.replyToken,
+            accessToken,
+          );
+          return;
+        }
+
+        // スイーツのmessageの場合
+        if (messageDetail.productType === 'randomSweets') {
+          const sweets = await sweetsService.getRandomSweets(
+            c.env.HONO_SWEETS,
+            messageDetail.store,
+            Constants.PREFIX,
+          );
+
+          if (!sweets) {
+            const textMessage = lineService.createTextMessage(
+              Constants.MessageConstants.NOT_SWEETS_MESSAGE,
+            );
+            await lineService.replyMessage<TextMessage>(
+              textMessage,
+              webhookEventHandlers.replyToken,
+              accessToken,
+            );
+            return;
+          }
+
+          const flexMessage = lineService.createFlexMessage(sweets);
+          await lineService.replyMessage<FlexMessage>(
+            flexMessage,
             webhookEventHandlers.replyToken,
             accessToken,
           );
         }
 
-        const sweets = await sweetsService.getRandomSweets(
-          c.env.HONO_SWEETS,
-          storeType,
-          Constants.PREFIX,
+        // 新商品のmessageの場合
+        if (messageDetail.productType === 'newProducts') {
+          const sweets = await sweetsService.getStoreAllSweets(
+            c.env.HONO_SWEETS,
+            Constants.PREFIX + messageDetail.store,
+          );
+          if (!sweets) {
+            const textMessage = lineService.createTextMessage(
+              Constants.MessageConstants.NOT_SWEETS_MESSAGE,
+            );
+            await lineService.replyMessage<TextMessage>(
+              textMessage,
+              webhookEventHandlers.replyToken,
+              accessToken,
+            );
+            return;
+          }
+
+          const newSweets = sweetsService.filterNewSweets(sweets);
+          const carouselMessage = lineService.createCarouselMessage(newSweets);
+          const response = await lineService.replyMessage<FlexMessage>(
+            carouselMessage,
+            webhookEventHandlers.replyToken,
+            accessToken,
+          );
+
+          // エラーメッセージが返ってきた場合はエラーログを出力してエラーメッセージを返す。
+          if (isLineErrorMessage(response)) {
+            console.error(response);
+            const textMessage = lineService.createTextMessage(
+              Constants.MessageConstants.ERROR_MESSAGE,
+            );
+            const userId = event.source.userId;
+            await lineService.pushMessage<TextMessage>(textMessage, userId!, accessToken);
+          }
+        }
+        const textMessage = lineService.createTextMessage(
+          Constants.MessageConstants.DEFAULT_MESSAGE,
         );
-
-        if (!sweets) {
-          const textMessage = lineService.createTextMessage(
-            Constants.MessageConstants.NOT_SWEETS_MESSAGE,
-          );
-          return await lineService.replyMessage<TextMessage>(
-            textMessage,
-            webhookEventHandlers.replyToken,
-            accessToken,
-          );
-        }
-
-        const flexMessage = lineService.createFlexMessage(sweets);
-        const replyMessage = await lineService.replyMessage<FlexMessage>(
-          flexMessage,
+        await lineService.replyMessage<TextMessage>(
+          textMessage,
           webhookEventHandlers.replyToken,
           accessToken,
         );
-        return replyMessage;
-        // TODO: エラーハンドリング
       } catch (err: unknown) {
         if (err instanceof Error) {
           console.error(err);
         }
-        return c.json(
-          {
-            status: 'error',
-          },
-          500,
-        );
+        return c.json({ status: 'error' }, 500);
       }
     }),
   );
@@ -92,7 +161,7 @@ app.post('/webhook', async (c) => {
   return c.json({ message: 'ok' }, 200);
 });
 
-const scheduledEvent = async (env: Bindings) => {
+export const scheduledEvent = async (env: Bindings) => {
   const di = diContainer;
   const sweetsService = di.get('SweetsService');
   const sweetsApiService = di.get('SweetsApiService');

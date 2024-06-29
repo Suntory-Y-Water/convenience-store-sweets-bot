@@ -1,4 +1,14 @@
-import { ISweetsApiRepository } from '../interfaces/sweetsApiInterface';
+export interface ISweetsApiRepository {
+  /**
+   *
+   * @description fetch text response from url
+   * @param {string} url
+   * @param {Record<string, string>} [headers]
+   * @return {*}  {Promise<string>}
+   * @memberof ISweetsApiRepository
+   */
+  fetchTextResponse(url: string, headers?: Record<string, string>): Promise<string>;
+}
 
 export class SweetsApiRepository implements ISweetsApiRepository {
   fetchTextResponse = async (

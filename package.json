@@ -3,6 +3,7 @@
   "scripts": {
     "dev": "wrangler dev src/index.ts",
     "schedule": "wrangler dev --test-scheduled src/index.ts",
+    "tail": "wrangler tail",
     "deploy": "wrangler deploy --minify src/index.ts",
     "test": "jest --verbose",
     "watch:test": "jest --verbose --watch",

@@ -1,12 +1,19 @@
 import { ItemDetailSelector } from '../types';
 
 export class Constants {
+  /**
+   * @description メッセージの定数
+   * @static
+   * @memberof Constants
+   */
   static readonly MessageConstants = {
-    /**「セブンのスイーツ」「ファミマのスイーツ」「ローソンのスイーツ」のどれかを送信すると、スイーツの情報をお届けします！🍰 */
-    DEFAULT_MESSAGE:
-      '「セブンのスイーツ」「ファミマのスイーツ」「ローソンのスイーツ」のどれかを送信すると、スイーツの情報をお届けします！🍰',
+    /**「セブンのスイーツ」「ファミマのスイーツ」「ローソンのスイーツ」のどれかを送信すると、ランダムにスイーツの情報をお届けします！🍰
+      「セブンの新商品」「ファミマの新商品」「ローソンの新商品」のどれかを送信すると、新商品のスイーツの情報をお届けします！🎉 */
+    DEFAULT_MESSAGE: `「セブンのスイーツ」「ファミマのスイーツ」「ローソンのスイーツ」のどれかを送信すると、ランダムにスイーツの情報をお届けします！🍰\n「セブンの新商品」「ファミマの新商品」「ローソンの新商品」のどれかを送信すると、新商品のスイーツの情報をお届けします！🎉`,
     /**スイーツが見つかりませんでした😭 */
     NOT_SWEETS_MESSAGE: 'スイーツが見つかりませんでした😭',
+    /**エラーが発生しました😭 時間をあけて再度送信してください。 */
+    ERROR_MESSAGE: 'エラーが発生しました。\n時間をあけて再度送信してください🙇‍♂️',
   };
 
   static readonly ConvenienceStoreItemUrl = {
@@ -24,6 +31,7 @@ export class Constants {
     itemNameSelector: ' .item_ttl a',
     itemPriceSelector: ' .item_price p',
     itemImageSelector: ' figure a img',
+    itemLaunchSelector: ' .item_launch',
     itemImageSelectorAttribute: 'data-original',
     itemHrefSelector: ' figure a',
     storeType: 'SevenEleven',
@@ -35,6 +43,7 @@ export class Constants {
     itemNameSelector: ' .ly-mod-infoset3-name',
     itemPriceSelector: ' .ly-mod-infoset3-price',
     itemImageSelector: ' .ly-wrp-mod-infoset3-img img',
+    itemLaunchSelector: ' .ly-mod-infoset3-link',
     itemImageSelectorAttribute: 'src',
     itemHrefSelector: ' .ly-mod-infoset3-link',
     storeType: 'FamilyMart',
@@ -46,6 +55,7 @@ export class Constants {
     itemNameSelector: ' .ttl',
     itemPriceSelector: ' .price span',
     itemImageSelector: ' .img a img',
+    itemLaunchSelector: ' .ico_new',
     itemImageSelectorAttribute: 'src',
     itemHrefSelector: ' .img a',
     storeType: 'Lawson',

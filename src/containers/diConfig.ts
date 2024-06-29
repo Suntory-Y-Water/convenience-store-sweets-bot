@@ -1,10 +1,10 @@
-import { ILineRepository } from '../interfaces/lineInterface';
-import { LineRepository } from '../repositories/lineRepository';
+import { ILineRepository, LineRepository } from '../repositories/lineRepository';
 import { ILineService, LineService } from '../services/lineService';
-import { ISweetsApiRepository } from '../interfaces/sweetsApiInterface';
-import { ISweetsRepository } from '../interfaces/sweetsInterface';
-import { SweetsApiRepository } from '../repositories/sweetsApiRepository';
-import { SweetsRepository } from '../repositories/sweetsRepository';
+import {
+  ISweetsApiRepository,
+  SweetsApiRepository,
+} from '../repositories/sweetsApiRepository';
+import { ISweetsRepository, SweetsRepository } from '../repositories/sweetsRepository';
 import { SweetsService, ISweetsService } from '../services/sweetsService';
 import { SweetsApiService, ISweetsApiService } from '../services/sweetsApiService';
 import { DIContainer } from './diContainer';

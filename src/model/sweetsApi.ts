@@ -7,6 +7,7 @@ export interface ItemDetailSelector extends SweetsStoreType {
   readonly itemNameSelector: string;
   readonly itemPriceSelector: string;
   readonly itemImageSelector: string;
+  readonly itemLaunchSelector?: string;
   readonly itemImageSelectorAttribute: 'data-original' | 'src';
   readonly itemHrefSelector: string;
 }
