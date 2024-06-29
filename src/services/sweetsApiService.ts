@@ -169,7 +169,6 @@ export class SweetsApiService implements ISweetsApiService {
               currentProduct.itemPrice ||
               currentProduct.itemImage
             ) {
-              console.log(`Pushing product: ${JSON.stringify(currentProduct)}`);
               results.push(currentProduct);
               currentProduct = {
                 itemName: '',
