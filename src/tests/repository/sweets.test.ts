@@ -1,7 +1,7 @@
 import { Constants } from '../../constants';
 import { diContainer } from '../../containers/diConfig';
-import { ISweetsRepository } from '../../interfaces/sweetsInterface';
 import { Sweets } from '../../model/sweets';
+import { ISweetsRepository } from '../../repositories/sweetsRepository';
 
 const env = getMiniflareBindings();
 const sweetsList: Sweets[] = [
@@ -66,8 +66,7 @@ describe('sweets repository tests', () => {
     // act
     const lists = await sweetsRepository.fetchItemKVStoreKey(
       env.HONO_SWEETS,
-      storeType,
-      prefix,
+      prefix + storeType,
     );
 
     // assert

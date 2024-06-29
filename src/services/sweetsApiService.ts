@@ -1,8 +1,16 @@
-import { ISweetsApiRepository } from '../interfaces/sweetsApiInterface';
-import { Sweets } from '../model/sweets';
+import { ReleasePeriod, Sweets } from '../model/sweets';
 import { GetSweetsDetailParams } from '../model/sweetsApi';
+import { ISweetsApiRepository } from '../repositories/sweetsApiRepository';
 
 export interface ISweetsApiService {
+  /**
+   *
+   * @description 指定されたURLからhtmlを取得する
+   * @param {string} url
+   * @param {Record<string, string>} [headers]
+   * @return {*}  {Promise<string>}
+   * @memberof ISweetsApiService
+   */
   fetchSweetsUrl(url: string, headers?: Record<string, string>): Promise<string>;
   /**
    *
@@ -15,7 +23,53 @@ export interface ISweetsApiService {
   parsePrice(text: string): string;
   parseImage(element: Element, baseUrl: string, storeType: string): string;
   parseHref(element: Element, baseUrl: string, storeType: string): string;
+
+  /**
+   *
+   * @description テキスト化したhtmlから商品情報を抽出してする
+   * @param {GetSweetsDetailParams} params
+   * @return {*}  {Promise<Sweets[]>}
+   * @memberof ISweetsApiService
+   */
   getSweetsDetail(params: GetSweetsDetailParams): Promise<Sweets[]>;
+  /**
+   *
+   * @description クラスが存在するかどうかを判定する
+   * @param {Element} element
+   * @param {string} className
+   * @memberof SweetsApiService
+   */
+  hasClass(element: Element, className: string): boolean;
+
+  /**
+   *
+   * @description テキストを受け取り、商品が新商品かどうかを判定する
+   * @param {string} text
+   * @return {*}  {{
+   *     isNew?: boolean;
+   *     releasePeriod?: ReleasePeriod;
+   *   }}
+   * @memberof ISweetsApiService
+   */
+  isNewProductTextString(text: string): {
+    isNew?: boolean;
+    releasePeriod?: ReleasePeriod;
+  };
+
+  /**
+   *
+   * @description Elementを受け取り、商品が新商品かどうかを判定する
+   * @param {Element} element
+   * @return {*}  {{
+   *     isNew?: boolean;
+   *     releasePeriod?: ReleasePeriod;
+   *   }}
+   * @memberof ISweetsApiService
+   */
+  isNewProductElement(element: Element): {
+    isNew?: boolean;
+    releasePeriod?: ReleasePeriod;
+  };
 }
 
 export class SweetsApiService implements ISweetsApiService {
@@ -61,6 +115,40 @@ export class SweetsApiService implements ISweetsApiService {
     return storeType === 'FamilyMart' ? href : baseUrl + href;
   }
 
+  hasClass = (element: Element, className: string): boolean => {
+    const classes = element.getAttribute('class');
+    return classes ? classes.includes(className) : false;
+  };
+
+  // TODO: あまりこの実装は美しくない
+  isNewProductElement = (
+    element: Element,
+  ): { isNew?: boolean; releasePeriod?: ReleasePeriod } => {
+    if (this.hasClass(element, 'ly-icn-soon')) {
+      return { isNew: true, releasePeriod: 'next_week' };
+    } else if (this.hasClass(element, 'ly-icn-new')) {
+      return { isNew: true, releasePeriod: 'this_week' };
+    }
+    return {};
+  };
+
+  // TODO: あまりこの実装は美しくない
+  isNewProductTextString = (
+    text: string,
+  ): { isNew?: boolean; releasePeriod?: ReleasePeriod } => {
+    if (text.includes('以降順次発売')) {
+      return { isNew: true, releasePeriod: 'this_week' };
+    }
+    if (text.includes('新発売')) {
+      return { isNew: true, releasePeriod: 'this_week' };
+    }
+    const nextWeekMatch = text.match(/(\d{1,2})月(\d{1,2})日発売/);
+    if (nextWeekMatch) {
+      return { isNew: true, releasePeriod: 'next_week' };
+    }
+    return {};
+  };
+
   getSweetsDetail = async (params: GetSweetsDetailParams): Promise<Sweets[]> => {
     try {
       const results: Sweets[] = [];
@@ -70,6 +158,7 @@ export class SweetsApiService implements ISweetsApiService {
         itemImage: '',
         itemHref: '',
         storeType: params.storeType,
+        metadata: {},
       };
 
       const rewriter = new HTMLRewriter()
@@ -87,6 +176,7 @@ export class SweetsApiService implements ISweetsApiService {
                 itemImage: '',
                 itemHref: '',
                 storeType: params.storeType,
+                metadata: {},
               };
             }
           },
@@ -117,6 +207,21 @@ export class SweetsApiService implements ISweetsApiService {
               params.baseUrl,
               params.storeType,
             );
+          },
+        })
+        .on(params.baseSelector + params.itemLaunchSelector, {
+          element: (element) => {
+            if (params.storeType === 'FamilyMart' && !currentProduct.metadata?.isNew) {
+              currentProduct.metadata = this.isNewProductElement(element);
+            }
+          },
+          text: (text) => {
+            if (
+              (params.storeType === 'Lawson' || params.storeType === 'SevenEleven') &&
+              !currentProduct.metadata?.isNew
+            ) {
+              currentProduct.metadata = this.isNewProductTextString(text.text);
+            }
           },
         });
       const response = new Response(params.responseHtml);

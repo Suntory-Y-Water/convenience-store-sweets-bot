@@ -16,9 +16,21 @@ export type LineErrorMessage = {
   message: string;
 
   /**
-   * http status code.
+   * エラー詳細の配列。配列が空の場合は、レスポンスに含まれません。
    */
-  state: number;
+  details?: DetailsEntity[] | null;
+};
+
+type DetailsEntity = {
+  /**
+   * エラーの詳細。特定の状況ではレスポンスに含まれません。詳しくは、「エラーの詳細」を参照してください。
+   */
+  message: string;
+
+  /**
+   * エラーの発生箇所。リクエストのJSONのフィールド名やクエリパラメータ名が返ります。特定の状況ではレスポンスに含まれません。
+   */
+  property: string;
 };
 
 export interface MessageEventHandler {

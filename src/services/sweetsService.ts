@@ -1,7 +1,23 @@
-import { ISweetsRepository } from '../interfaces/sweetsInterface';
 import { Sweets } from '../model/sweets';
+import { ISweetsRepository } from '../repositories/sweetsRepository';
 
 export interface ISweetsService {
+  /**
+   * @description KVストアから指定したコンビニのスイーツ情報を全件取得する。
+   * @param {KVNamespace} KV
+   * @param {string} prefix (prefix + storeType)
+   * @return {*}  {(Promise<Sweets[] | null>)}
+   * @memberof ISweetsService
+   */
+  getStoreAllSweets(KV: KVNamespace, prefix: string): Promise<Sweets[] | null>;
+
+  /**
+   * @description Sweets型の配列から、新商品のSweetsだけを取り出して今週の新商品の昇順にして返却する。
+   * @param {Sweets[]} sweetsArray
+   * @return {*}  {Sweets[]}
+   * @memberof ISweetsService
+   */
+  filterNewSweets(sweetsArray: Sweets[]): Sweets[];
   getRandomSweets(
     KV: KVNamespace,
     storeType: string,
@@ -9,7 +25,6 @@ export interface ISweetsService {
   ): Promise<Sweets | null>;
   createSweets(KV: KVNamespace, prefix: string, sweets: Sweets[]): Promise<void>;
   deleteSweets(KV: KVNamespace, prefix: string): Promise<void>;
-  switchStoreType(receivedMessage: string): string | null;
 }
 
 export class SweetsService implements ISweetsService {
@@ -18,17 +33,57 @@ export class SweetsService implements ISweetsService {
     this.sweetsRepository = sweetsRepository;
   }
 
-  switchStoreType = (receivedMessage: string): string | null => {
-    switch (receivedMessage) {
-      case 'セブンのスイーツ':
-        return 'SevenEleven';
-      case 'ファミマのスイーツ':
-        return 'FamilyMart';
-      case 'ローソンのスイーツ':
-        return 'Lawson';
-      default:
+  getStoreAllSweets = async (KV: KVNamespace, prefix: string) => {
+    try {
+      const lists = await this.sweetsRepository.fetchItemKVStoreKey(KV, prefix);
+      if (lists.keys.length === 0) {
         return null;
+      }
+
+      // コケたときに全てのPromiseが失敗するようにする
+      const promises = lists.keys.map(async (list) => {
+        const item = await this.sweetsRepository.fetchItemKVStoreValue<Sweets>(
+          KV,
+          list.name,
+        );
+        if (item === null) {
+          throw new Error('Item is null');
+        }
+        return item;
+      });
+
+      return await Promise.all(promises);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(`スイーツの情報取得に失敗しました : ${error.message}`);
+      }
+      return null;
     }
+  };
+
+  filterNewSweets = (sweetsArray: Sweets[]): Sweets[] => {
+    return sweetsArray
+      .filter((sweets) => sweets.metadata?.isNew === true)
+      .sort((a, b) => {
+        const releaseOrder = { this_week: 0, next_week: 1 };
+
+        if (a.metadata?.releasePeriod && b.metadata?.releasePeriod) {
+          return (
+            releaseOrder[a.metadata.releasePeriod] -
+            releaseOrder[b.metadata.releasePeriod]
+          );
+        }
+
+        if (a.metadata?.releasePeriod) {
+          return -1;
+        }
+
+        if (b.metadata?.releasePeriod) {
+          return 1;
+        }
+
+        return 0;
+      });
   };
 
   getRandomSweets = async (
@@ -37,11 +92,8 @@ export class SweetsService implements ISweetsService {
     prefix: string,
   ): Promise<Sweets | null> => {
     try {
-      const lists = await this.sweetsRepository.fetchItemKVStoreKey(
-        KV,
-        storeType,
-        prefix,
-      );
+      const params = prefix + storeType;
+      const lists = await this.sweetsRepository.fetchItemKVStoreKey(KV, params);
 
       if (lists.keys.length === 0) {
         return null;
@@ -78,6 +130,7 @@ export class SweetsService implements ISweetsService {
         itemImage: item.itemImage,
         itemHref: item.itemHref,
         storeType: item.storeType,
+        metadata: item.metadata,
       };
       await this.sweetsRepository.putItemKVStore<Sweets>(
         KV,
