@@ -1,5 +1,7 @@
+import { Constants } from '../constants';
 import { Sweets } from '../model/sweets';
 import { ISweetsRepository } from '../repositories/sweetsRepository';
+import { Cache } from '../utils/cache';
 
 export interface ISweetsService {
   /**
@@ -29,11 +31,18 @@ export interface ISweetsService {
 
 export class SweetsService implements ISweetsService {
   private sweetsRepository: ISweetsRepository;
+  private cache: Cache<Sweets[]>;
   constructor(sweetsRepository: ISweetsRepository) {
     this.sweetsRepository = sweetsRepository;
+    this.cache = new Cache<Sweets[]>(Constants.CACHE_TTL);
   }
 
   getStoreAllSweets = async (KV: KVNamespace, prefix: string) => {
+    const cacheKey = `getStoreAllSweets-${prefix}`;
+    const cachedData = this.cache.get(cacheKey);
+    if (cachedData) {
+      return cachedData;
+    }
     try {
       const lists = await this.sweetsRepository.fetchItemKVStoreKey(KV, prefix);
       if (lists.keys.length === 0) {
@@ -52,7 +61,9 @@ export class SweetsService implements ISweetsService {
         return item;
       });
 
-      return await Promise.all(promises);
+      const data = await Promise.all(promises);
+      this.cache.set(cacheKey, data);
+      return data;
     } catch (error) {
       if (error instanceof Error) {
         console.error(`スイーツの情報取得に失敗しました : ${error.message}`);

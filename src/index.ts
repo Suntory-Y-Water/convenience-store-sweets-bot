@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { Context, Hono } from 'hono';
 import { Bindings, isLineErrorMessage } from './types';
 import { DIContainer } from './containers/diContainer';
 import { DependencyTypes, diContainer } from './containers/diConfig';
@@ -10,6 +10,7 @@ import {
 } from '@line/bot-sdk';
 import { Constants } from './constants';
 import { Sweets } from './model/sweets';
+import { BlankInput } from 'hono/types';
 
 const app = new Hono<{
   Variables: {
@@ -50,6 +51,23 @@ app.get('/random', async (c) => {
 
 app.post('/webhook', async (c) => {
   const data = await c.req.json<WebhookRequestBody>();
+  c.executionCtx.waitUntil(messageEvent(c, data));
+  return c.json({ message: 'ok' }, 200);
+});
+
+const messageEvent = async (
+  c: Context<
+    {
+      Variables: {
+        diContainer: DIContainer<DependencyTypes>;
+      };
+      Bindings: Bindings;
+    },
+    '/api/webhook',
+    BlankInput
+  >,
+  data: WebhookRequestBody,
+) => {
   const events = data.events;
   const accessToken = c.env.CHANNEL_ACCESS_TOKEN;
   const di = c.get('diContainer');
@@ -153,13 +171,10 @@ app.post('/webhook', async (c) => {
         if (err instanceof Error) {
           console.error(err);
         }
-        return c.json({ status: 'error' }, 500);
       }
     }),
   );
-
-  return c.json({ message: 'ok' }, 200);
-});
+};
 
 export const scheduledEvent = async (env: Bindings) => {
   const di = diContainer;
