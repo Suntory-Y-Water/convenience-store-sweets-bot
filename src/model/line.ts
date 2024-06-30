@@ -39,4 +39,7 @@ export interface MessageEventHandler {
 
   /** クライアントから受信したLINEのメッセージ */
   message: string;
+
+  /** クライアントから受信したLINEのユーザーID */
+  userId: string;
 }

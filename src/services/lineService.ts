@@ -32,6 +32,16 @@ export interface ILineService {
     userId: string,
     accessToken: string,
   ): Promise<SentMessage | LineErrorMessage>;
+  /**
+   * @description LINEでローディングアニメーションを表示する
+   * @param {string} userId 送信先ユーザーID
+   * @param {string} accessToken LINE APIのアクセストークン
+   * @memberof LineRepository
+   */
+  loadingAnimation(
+    userId: string,
+    accessToken: string,
+  ): Promise<SentMessage | LineErrorMessage>;
 
   /**
    * @description LINEに送信するテキストメッセージを作成する
@@ -75,6 +85,7 @@ export class LineService implements ILineService {
     const returnMessage: MessageEventHandler = {
       replyToken: event.replyToken,
       message: event.message.text,
+      userId: event.source.userId!,
     };
 
     return returnMessage;
@@ -94,6 +105,13 @@ export class LineService implements ILineService {
     accessToken: string,
   ): Promise<SentMessage | LineErrorMessage> {
     return this.lineRepository.pushMessage(message, userId, accessToken);
+  }
+
+  loadingAnimation(
+    userId: string,
+    accessToken: string,
+  ): Promise<SentMessage | LineErrorMessage> {
+    return this.lineRepository.loadingAnimation(userId, accessToken);
   }
 
   switchStoreType = (receivedMessage: string): LineMessageType => {
