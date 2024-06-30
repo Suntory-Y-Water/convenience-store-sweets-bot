@@ -77,4 +77,17 @@ export class Constants {
 
   /** キャッシュの有効期限 60 * 30 * 1000 で30分 */
   static readonly CACHE_TTL = 60 * 30 * 1000;
+
+  /** LINE Messaging APIのベースURL */
+  static readonly LINE_API_URL = 'https://api.line.me/v2';
+
+  /** LINE Messaging APIのエンドポイント */
+  static readonly LINE_API_ENDPOINT = {
+    /** リプライメッセージ */
+    REPLY: '/bot/message/reply',
+    /** プッシュメッセージ */
+    PUSH: '/bot/message/push',
+    /** ローディングアニメーション */
+    LOADING: '/bot/chat/loading/start',
+  };
 }

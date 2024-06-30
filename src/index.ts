@@ -78,9 +78,11 @@ const messageEvent = async (
     events.map(async (event: WebhookEvent) => {
       try {
         const webhookEventHandlers = await lineService.textEventHandler(event);
-
         // ここでSweets情報を取得する処理を行う。取得したメッセージから店舗情報を取得する
         const messageDetail = lineService.switchStoreType(webhookEventHandlers.message);
+
+        // ローディングアニメーションを表示
+        await lineService.loadingAnimation(webhookEventHandlers.userId, accessToken);
 
         // メッセージに店舗情報を含まない場合は、デフォルトメッセージを返す
         if (!messageDetail.store) {
@@ -155,8 +157,11 @@ const messageEvent = async (
             const textMessage = lineService.createTextMessage(
               Constants.MessageConstants.ERROR_MESSAGE,
             );
-            const userId = event.source.userId;
-            await lineService.pushMessage<TextMessage>(textMessage, userId!, accessToken);
+            await lineService.pushMessage<TextMessage>(
+              textMessage,
+              webhookEventHandlers.replyToken,
+              accessToken,
+            );
           }
         }
         const textMessage = lineService.createTextMessage(
