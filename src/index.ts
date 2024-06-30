@@ -77,6 +77,7 @@ const messageEvent = async (
   await Promise.all(
     events.map(async (event: WebhookEvent) => {
       try {
+        const start = Date.now();
         const webhookEventHandlers = await lineService.textEventHandler(event);
 
         // ここでSweets情報を取得する処理を行う。取得したメッセージから店舗情報を取得する
@@ -125,10 +126,13 @@ const messageEvent = async (
 
         // 新商品のmessageの場合
         if (messageDetail.productType === 'newProducts') {
+          const sweetsStart = Date.now(); // Sweets取得開始時間を記録
           const sweets = await sweetsService.getStoreAllSweets(
             c.env.HONO_SWEETS,
             Constants.PREFIX + messageDetail.store,
           );
+          const sweetsEnd = Date.now(); // Sweets取得終了時間を記録
+          console.log(`getStoreAllSweets Execution time: ${sweetsEnd - sweetsStart} ms`);
           if (!sweets) {
             const textMessage = lineService.createTextMessage(
               Constants.MessageConstants.NOT_SWEETS_MESSAGE,
@@ -141,13 +145,23 @@ const messageEvent = async (
             return;
           }
 
+          const filterStart = Date.now(); // フィルタリング開始時間を記録
           const newSweets = sweetsService.filterNewSweets(sweets);
+          const filterEnd = Date.now(); // フィルタリング終了時間を記録
+          console.log(`filterNewSweets Execution time: ${filterEnd - filterStart} ms`);
+
+          const messageStart = Date.now();
           const carouselMessage = lineService.createCarouselMessage(newSweets);
           const response = await lineService.replyMessage<FlexMessage>(
             carouselMessage,
             webhookEventHandlers.replyToken,
             accessToken,
           );
+          const messageEnd = Date.now(); // メッセージ送信終了時間を記録
+          console.log(`replyMessage Execution time: ${messageEnd - messageStart} ms`);
+
+          const end = Date.now(); // 終了時間を記録
+          console.log(`Execution time: ${end - start} ms`);
 
           // エラーメッセージが返ってきた場合はエラーログを出力してエラーメッセージを返す。
           if (isLineErrorMessage(response)) {
@@ -167,6 +181,8 @@ const messageEvent = async (
           webhookEventHandlers.replyToken,
           accessToken,
         );
+        const end = Date.now(); // 終了時間を記録
+        console.log(`Message event processing time: ${end - start} ms`);
       } catch (err: unknown) {
         if (err instanceof Error) {
           console.error(err);
