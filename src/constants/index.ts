@@ -74,4 +74,7 @@ export class Constants {
   /** userAgent header部に何もつけないと各社HPの情報を取得しようとしたとき403Forbiddenになるため使用 */
   static readonly USER_AGENT =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36';
+
+  /** キャッシュの有効期限 60 * 30 * 1000 で30分 */
+  static readonly CACHE_TTL = 60 * 30 * 1000;
 }
