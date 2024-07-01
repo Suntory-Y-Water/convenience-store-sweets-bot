@@ -81,24 +81,15 @@ const messageEvent = async (
         // ここでSweets情報を取得する処理を行う。取得したメッセージから店舗情報を取得する
         const messageDetail = lineService.switchStoreType(webhookEventHandlers.message);
 
-        // ローディングアニメーションを表示
-        await lineService.loadingAnimation(webhookEventHandlers.userId, accessToken);
-
-        // メッセージに店舗情報を含まない場合は、デフォルトメッセージを返す
+        // メッセージに店舗情報を含まない場合は、処理を終了する
         if (!messageDetail.store) {
-          const textMessage = lineService.createTextMessage(
-            Constants.MessageConstants.DEFAULT_MESSAGE,
-          );
-          await lineService.replyMessage<TextMessage>(
-            textMessage,
-            webhookEventHandlers.replyToken,
-            accessToken,
-          );
           return;
         }
 
         // スイーツのmessageの場合
         if (messageDetail.productType === 'randomSweets') {
+          // ローディングアニメーションを表示
+          await lineService.loadingAnimation(webhookEventHandlers.userId, accessToken);
           const sweets = await sweetsService.getRandomSweets(
             c.env.HONO_SWEETS,
             messageDetail.store,
@@ -127,6 +118,8 @@ const messageEvent = async (
 
         // 新商品のmessageの場合
         if (messageDetail.productType === 'newProducts') {
+          // ローディングアニメーションを表示
+          await lineService.loadingAnimation(webhookEventHandlers.userId, accessToken);
           const sweets = await sweetsService.getStoreAllSweets(
             c.env.HONO_SWEETS,
             Constants.PREFIX + messageDetail.store,
