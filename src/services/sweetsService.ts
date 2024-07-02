@@ -1,6 +1,6 @@
 import { Constants } from '../constants';
-import { Sweets } from '../model/sweets';
 import { ISweetsRepository } from '../repositories/sweetsRepository';
+import { Sweets } from '../types';
 import { Cache } from '../utils/cache';
 
 export interface ISweetsService {

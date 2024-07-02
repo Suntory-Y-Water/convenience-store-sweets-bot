@@ -1,5 +1,5 @@
 import { Constants } from '../constants';
-import { LineErrorMessage, SentMessage } from '../model/line';
+import { LineErrorMessage, SentMessage } from '../types';
 
 export interface ILineRepository {
   /**

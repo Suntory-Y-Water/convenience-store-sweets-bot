@@ -1,8 +1,14 @@
 import { FlexMessage, TextMessage, WebhookEvent } from '@line/bot-sdk';
-import { LineErrorMessage, MessageEventHandler, SentMessage } from '../model/line';
-import { Sweets } from '../model/sweets';
 import { ILineRepository } from '../repositories/lineRepository';
-import { LineMessageType, ProductType, StoreType } from '../types';
+import {
+  LineErrorMessage,
+  LineMessageType,
+  MessageEventHandler,
+  ProductType,
+  SentMessage,
+  StoreType,
+  Sweets,
+} from '../types';
 
 export interface ILineService {
   /**

@@ -1,5 +1,5 @@
 import { Context, Hono } from 'hono';
-import { Bindings, isLineErrorMessage } from './types';
+import { Bindings, Sweets, isLineErrorMessage } from './types';
 import { DIContainer } from './containers/diContainer';
 import { DependencyTypes, diContainer } from './containers/diConfig';
 import {
@@ -9,7 +9,6 @@ import {
   WebhookRequestBody,
 } from '@line/bot-sdk';
 import { Constants } from './constants';
-import { Sweets } from './model/sweets';
 import { BlankInput } from 'hono/types';
 
 const app = new Hono<{

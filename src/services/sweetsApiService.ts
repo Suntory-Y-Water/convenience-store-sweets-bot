@@ -1,6 +1,5 @@
-import { ReleasePeriod, Sweets } from '../model/sweets';
-import { GetSweetsDetailParams } from '../model/sweetsApi';
 import { ISweetsApiRepository } from '../repositories/sweetsApiRepository';
+import { GetSweetsDetailParams, ReleasePeriod, Sweets } from '../types';
 
 export interface ISweetsApiService {
   /**
