@@ -1,4 +1,4 @@
-import { ItemDetailSelector } from '../types';
+import { ItemDetailSelector, QuickReplyTypes } from '../types';
 
 export class Constants {
   /**
@@ -14,6 +14,9 @@ export class Constants {
     NOT_SWEETS_MESSAGE: 'スイーツが見つかりませんでした😭',
     /**エラーが発生しました😭 時間をあけて再度送信してください。 */
     ERROR_MESSAGE: 'エラーが発生しました。\n時間をあけて再度送信してください🙇‍♂️',
+
+    NEW_PRODUCTS_ESSAGEM:
+      '新商品のスイーツ情報をお届けします！\nコンビニを選択してください🙏',
   };
 
   static readonly ConvenienceStoreItemUrl = {
@@ -90,4 +93,23 @@ export class Constants {
     /** ローディングアニメーション */
     LOADING: '/bot/chat/loading/start',
   };
+
+  /** クイックリプライの定数 */
+  static readonly QUICK_REPLY_ITEMS: QuickReplyTypes[] = [
+    {
+      text: 'セブンの新商品',
+      imageUrl:
+        'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgoN4UTK5Lwr09cwyeeiBIOdFlD1I7IpZoPJUlLQmJpVbNhERIeH68cz_kqnPpi66rv93x-Ij7Pso3W2y981SD7sie0UKskCOhaYFJeQLv1Q6cmV33NPW3v09WF5EP4ou38hIHwa-D73C3C/s800/building_convenience_store1_notime.png',
+    },
+    {
+      text: 'ファミマの新商品',
+      imageUrl:
+        'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiPy_ibJ-mQTOV-7WCMPcx0_V28vOH3LoNx8CDDuyJuedxEvzzAyY_9Ri6ip_vObvlFmn9w2kVmzFGB8IXkp4AV4A4P8w5F6lHQCtDdQ0tCbz6ywziH_9rxsl0iVwcWoVe3j3Xaov-fnz_D/s800/building_convenience_store2_notime.png',
+    },
+    {
+      text: 'ローソンの新商品',
+      imageUrl:
+        'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj3Jp2nnjJejsd91wb1RK2c4mNc0y6xFkXUiBk4MxxGHLA8ODYRZvZSQ0tCWVvkZNTZVXsIcZ3Ppga1aHxFpYVw19NIu3sov6RrGssMaZJKCrTib6rRQ7fi2zs_6TVeDsM0APgcNchJ57ha/s800/building_convenience_store3_notime.png',
+    },
+  ];
 }

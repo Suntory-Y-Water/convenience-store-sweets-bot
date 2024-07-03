@@ -5,6 +5,7 @@ import {
   LineMessageType,
   MessageEventHandler,
   ProductType,
+  QuickReplyTypes,
   SentMessage,
   StoreType,
   Sweets,
@@ -75,6 +76,15 @@ export interface ILineService {
    * @memberof ILineService
    */
   switchStoreType(receivedMessage: string): LineMessageType;
+
+  /**
+   * @description LINEに送信するクイックリプライを作成する
+   * @param {string} message
+   * @param {QuickReplyTypes[]} items
+   * @return {*}  {QuickReply}
+   * @memberof ILineService
+   */
+  createQuickReply(message: string, items: QuickReplyTypes[]): TextMessage;
 }
 
 export class LineService implements ILineService {
@@ -270,6 +280,26 @@ export class LineService implements ILineService {
             },
           ],
         },
+      },
+    };
+  }
+
+  createQuickReply(message: string, items: QuickReplyTypes[]): TextMessage {
+    return {
+      type: 'text',
+      text: message,
+      quickReply: {
+        items: items.map((item) => {
+          return {
+            type: 'action',
+            imageUrl: item.imageUrl,
+            action: {
+              type: 'message',
+              label: item.text,
+              text: item.text,
+            },
+          };
+        }),
       },
     };
   }

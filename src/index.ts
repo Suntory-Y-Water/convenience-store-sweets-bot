@@ -81,6 +81,19 @@ const messageEvent = async (
         const messageDetail = lineService.switchStoreType(webhookEventHandlers.message);
 
         // メッセージに店舗情報を含まない場合は、処理を終了する
+        if (!messageDetail.store && messageDetail.productType === 'newProducts') {
+          const quickReply = lineService.createQuickReply(
+            Constants.MessageConstants.NEW_PRODUCTS_ESSAGEM,
+            Constants.QUICK_REPLY_ITEMS,
+          );
+          await lineService.pushMessage(
+            quickReply,
+            webhookEventHandlers.userId,
+            accessToken,
+          );
+        }
+
+        // メッセージに店舗情報を含まない場合は、処理を終了する
         if (!messageDetail.store) {
           return;
         }

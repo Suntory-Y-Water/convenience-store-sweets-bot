@@ -85,6 +85,13 @@ export interface MessageEventHandler {
   userId: string;
 }
 
+export type QuickReplyTypes = {
+  /** クイックリプライに設定するメッセージ文字列 */
+  text: string;
+  /** クイックリプライに設定する画像 */
+  imageUrl: string;
+};
+
 export type ReleasePeriod = 'this_week' | 'next_week';
 
 export interface Sweets {
