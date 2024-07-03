@@ -1,7 +1,7 @@
 import { Constants } from '../../constants';
 import { diContainer } from '../../containers/diConfig';
-import { Sweets } from '../../model/sweets';
 import { ISweetsRepository } from '../../repositories/sweetsRepository';
+import { Sweets } from '../../types';
 
 const env = getMiniflareBindings();
 const sweetsList: Sweets[] = [

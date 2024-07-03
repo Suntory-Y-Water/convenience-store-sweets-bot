@@ -1,5 +1,5 @@
 import { Context, Hono } from 'hono';
-import { Bindings, isLineErrorMessage } from './types';
+import { Bindings, Sweets, isLineErrorMessage } from './types';
 import { DIContainer } from './containers/diContainer';
 import { DependencyTypes, diContainer } from './containers/diConfig';
 import {
@@ -9,7 +9,6 @@ import {
   WebhookRequestBody,
 } from '@line/bot-sdk';
 import { Constants } from './constants';
-import { Sweets } from './model/sweets';
 import { BlankInput } from 'hono/types';
 
 const app = new Hono<{
@@ -78,25 +77,31 @@ const messageEvent = async (
     events.map(async (event: WebhookEvent) => {
       try {
         const webhookEventHandlers = await lineService.textEventHandler(event);
-
         // ここでSweets情報を取得する処理を行う。取得したメッセージから店舗情報を取得する
         const messageDetail = lineService.switchStoreType(webhookEventHandlers.message);
 
-        // メッセージに店舗情報を含まない場合は、デフォルトメッセージを返す
-        if (!messageDetail.store) {
-          const textMessage = lineService.createTextMessage(
-            Constants.MessageConstants.DEFAULT_MESSAGE,
+        // メッセージに店舗情報を含まない場合は、処理を終了する
+        if (!messageDetail.store && messageDetail.productType === 'newProducts') {
+          const quickReply = lineService.createQuickReply(
+            Constants.MessageConstants.NEW_PRODUCTS_ESSAGEM,
+            Constants.QUICK_REPLY_ITEMS,
           );
-          await lineService.replyMessage<TextMessage>(
-            textMessage,
-            webhookEventHandlers.replyToken,
+          await lineService.pushMessage(
+            quickReply,
+            webhookEventHandlers.userId,
             accessToken,
           );
+        }
+
+        // メッセージに店舗情報を含まない場合は、処理を終了する
+        if (!messageDetail.store) {
           return;
         }
 
         // スイーツのmessageの場合
         if (messageDetail.productType === 'randomSweets') {
+          // ローディングアニメーションを表示
+          await lineService.loadingAnimation(webhookEventHandlers.userId, accessToken);
           const sweets = await sweetsService.getRandomSweets(
             c.env.HONO_SWEETS,
             messageDetail.store,
@@ -125,6 +130,8 @@ const messageEvent = async (
 
         // 新商品のmessageの場合
         if (messageDetail.productType === 'newProducts') {
+          // ローディングアニメーションを表示
+          await lineService.loadingAnimation(webhookEventHandlers.userId, accessToken);
           const sweets = await sweetsService.getStoreAllSweets(
             c.env.HONO_SWEETS,
             Constants.PREFIX + messageDetail.store,
@@ -155,8 +162,11 @@ const messageEvent = async (
             const textMessage = lineService.createTextMessage(
               Constants.MessageConstants.ERROR_MESSAGE,
             );
-            const userId = event.source.userId;
-            await lineService.pushMessage<TextMessage>(textMessage, userId!, accessToken);
+            await lineService.pushMessage<TextMessage>(
+              textMessage,
+              webhookEventHandlers.replyToken,
+              accessToken,
+            );
           }
         }
         const textMessage = lineService.createTextMessage(

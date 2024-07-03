@@ -1,4 +1,5 @@
-import { LineErrorMessage, SentMessage } from '../model/line';
+import { Constants } from '../constants';
+import { LineErrorMessage, SentMessage } from '../types';
 
 export interface ILineRepository {
   /**
@@ -26,25 +27,33 @@ export interface ILineRepository {
     userId: string,
     accessToken: string,
   ): Promise<SentMessage | LineErrorMessage>;
+
+  /**
+   * @description LINEでローディングアニメーションを表示する
+   * @param {string} userId 送信先ユーザーID
+   * @param {string} accessToken LINE APIのアクセストークン
+   * @memberof LineRepository
+   */
+  loadingAnimation(
+    userId: string,
+    accessToken: string,
+  ): Promise<SentMessage | LineErrorMessage>;
 }
 
 export class LineRepository implements ILineRepository {
-  replyMessage = async <T>(
-    message: T,
-    replyToken: string,
+  private async sendRequest(
+    endpoint: string,
+    body: object,
     accessToken: string,
-  ): Promise<LineErrorMessage | SentMessage> => {
+  ): Promise<SentMessage | LineErrorMessage> {
     try {
-      const response = await fetch(`https://api.line.me/v2/bot/message/reply`, {
+      const response = await fetch(Constants.LINE_API_URL + endpoint, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          replyToken: replyToken,
-          messages: [message],
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -64,6 +73,18 @@ export class LineRepository implements ILineRepository {
 
       return errorMessage;
     }
+  }
+
+  replyMessage = async <T>(
+    message: T,
+    replyToken: string,
+    accessToken: string,
+  ): Promise<LineErrorMessage | SentMessage> => {
+    const body = {
+      replyToken: replyToken,
+      messages: [message],
+    };
+    return this.sendRequest(Constants.LINE_API_ENDPOINT.REPLY, body, accessToken);
   };
 
   pushMessage = async <T>(
@@ -71,35 +92,20 @@ export class LineRepository implements ILineRepository {
     userId: string,
     accessToken: string,
   ): Promise<LineErrorMessage | SentMessage> => {
-    try {
-      const response = await fetch(`https://api.line.me/v2/bot/message/push`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          to: userId,
-          messages: [message],
-        }),
-      });
+    const body = {
+      to: userId,
+      messages: [message],
+    };
+    return this.sendRequest(Constants.LINE_API_ENDPOINT.PUSH, body, accessToken);
+  };
 
-      if (!response.ok) {
-        const data = (await response.json()) as LineErrorMessage;
-        return data;
-      }
-
-      const data = (await response.json()) as SentMessage;
-      return data;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      }
-      const errorMessage: LineErrorMessage = {
-        message: 'Internal Server Error',
-      };
-
-      return errorMessage;
-    }
+  loadingAnimation = async (
+    userId: string,
+    accessToken: string,
+  ): Promise<LineErrorMessage | SentMessage> => {
+    const body = {
+      chatId: userId,
+    };
+    return this.sendRequest(Constants.LINE_API_ENDPOINT.LOADING, body, accessToken);
   };
 }

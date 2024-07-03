@@ -1,7 +1,7 @@
 import { Constants } from '../../constants';
 import { diContainer } from '../../containers/diConfig';
-import { Sweets } from '../../model/sweets';
 import { ISweetsService } from '../../services/sweetsService';
+import { StoreType, Sweets } from '../../types';
 
 const env = getMiniflareBindings();
 
@@ -104,20 +104,21 @@ describe('sweets repository tests', () => {
 
   test('createSweets tests KVStoreのデータを作成でき、getRandomSweetsで値が取得できる', async () => {
     // arrange
-    const storeType = 'SevenEleven';
+    const storeType: StoreType = 'Lawson';
     const sweets: Sweets[] = [
       {
-        itemName: 'くちどけショコラクレープ',
+        itemName: 'テストくちどけショコラクレープ',
         itemPrice: '214円(税込)',
         itemImage: 'https://www.lawson.co.jp/recommend/original/detail/img/l746728.jpg',
         itemHref: 'https://www.lawson.co.jp/recommend/original/detail/1480892_1996.html',
-        storeType: 'SevenEleven',
+        storeType: storeType,
+        metadata: {},
       },
     ];
+
     // TODO: 本来はseed()で削除するべきだが、動作不安定のためテストがPASSになったメソッドを直接実行。
     // あまり良くないやり方
     await sweetsService.deleteSweets(env.HONO_SWEETS, Constants.PREFIX);
-
     // act
     await sweetsService.createSweets(env.HONO_SWEETS, Constants.PREFIX, sweets);
 
@@ -127,6 +128,7 @@ describe('sweets repository tests', () => {
       storeType,
       Constants.PREFIX,
     );
+
     expect(result).not.toBeNull();
     // resultはオブジェクトであり、配列の要素が1つであることを確認
     // resultが配列の要素を持ち、その要素が1つであることを確認
@@ -135,11 +137,12 @@ describe('sweets repository tests', () => {
     // 追加のアサーションとして、resultの内容を確認
     expect(result).toEqual(
       expect.objectContaining({
-        itemName: 'くちどけショコラクレープ',
+        itemName: 'テストくちどけショコラクレープ',
         itemPrice: '214円(税込)',
         itemImage: 'https://www.lawson.co.jp/recommend/original/detail/img/l746728.jpg',
         itemHref: 'https://www.lawson.co.jp/recommend/original/detail/1480892_1996.html',
-        storeType: 'SevenEleven',
+        storeType: storeType,
+        metadata: {},
       }),
     );
   });

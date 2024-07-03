@@ -1,6 +1,6 @@
 import { Constants } from '../constants';
-import { Sweets } from '../model/sweets';
 import { ISweetsRepository } from '../repositories/sweetsRepository';
+import { Sweets } from '../types';
 import { Cache } from '../utils/cache';
 
 export interface ISweetsService {
@@ -32,9 +32,13 @@ export interface ISweetsService {
 export class SweetsService implements ISweetsService {
   private sweetsRepository: ISweetsRepository;
   private cache: Cache<Sweets[]>;
+  private randomSweetsCache: Cache<KVNamespaceListResult<unknown, string>>;
   constructor(sweetsRepository: ISweetsRepository) {
     this.sweetsRepository = sweetsRepository;
     this.cache = new Cache<Sweets[]>(Constants.CACHE_TTL);
+    this.randomSweetsCache = new Cache<KVNamespaceListResult<unknown, string>>(
+      Constants.CACHE_TTL,
+    );
   }
 
   getStoreAllSweets = async (KV: KVNamespace, prefix: string) => {
@@ -104,7 +108,14 @@ export class SweetsService implements ISweetsService {
   ): Promise<Sweets | null> => {
     try {
       const params = prefix + storeType;
-      const lists = await this.sweetsRepository.fetchItemKVStoreKey(KV, params);
+      const cacheKey = `fetchItemKVStoreKey-${params}`;
+      // キャッシュからデータを取得
+      let lists = this.randomSweetsCache.get(cacheKey);
+      if (!lists) {
+        // キャッシュにデータがない場合、KVストアからデータを取得してキャッシュに保存
+        lists = await this.sweetsRepository.fetchItemKVStoreKey(KV, params);
+        this.randomSweetsCache.set(cacheKey, lists);
+      }
 
       if (lists.keys.length === 0) {
         return null;

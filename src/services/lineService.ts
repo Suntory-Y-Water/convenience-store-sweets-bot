@@ -1,8 +1,15 @@
 import { FlexMessage, TextMessage, WebhookEvent } from '@line/bot-sdk';
-import { LineErrorMessage, MessageEventHandler, SentMessage } from '../model/line';
-import { Sweets } from '../model/sweets';
 import { ILineRepository } from '../repositories/lineRepository';
-import { LineMessageType, ProductType, StoreType } from '../types';
+import {
+  LineErrorMessage,
+  LineMessageType,
+  MessageEventHandler,
+  ProductType,
+  QuickReplyTypes,
+  SentMessage,
+  StoreType,
+  Sweets,
+} from '../types';
 
 export interface ILineService {
   /**
@@ -29,6 +36,16 @@ export interface ILineService {
    */
   pushMessage<T>(
     message: T,
+    userId: string,
+    accessToken: string,
+  ): Promise<SentMessage | LineErrorMessage>;
+  /**
+   * @description LINEでローディングアニメーションを表示する
+   * @param {string} userId 送信先ユーザーID
+   * @param {string} accessToken LINE APIのアクセストークン
+   * @memberof LineRepository
+   */
+  loadingAnimation(
     userId: string,
     accessToken: string,
   ): Promise<SentMessage | LineErrorMessage>;
@@ -59,6 +76,15 @@ export interface ILineService {
    * @memberof ILineService
    */
   switchStoreType(receivedMessage: string): LineMessageType;
+
+  /**
+   * @description LINEに送信するクイックリプライを作成する
+   * @param {string} message
+   * @param {QuickReplyTypes[]} items
+   * @return {*}  {QuickReply}
+   * @memberof ILineService
+   */
+  createQuickReply(message: string, items: QuickReplyTypes[]): TextMessage;
 }
 
 export class LineService implements ILineService {
@@ -75,6 +101,7 @@ export class LineService implements ILineService {
     const returnMessage: MessageEventHandler = {
       replyToken: event.replyToken,
       message: event.message.text,
+      userId: event.source.userId!,
     };
 
     return returnMessage;
@@ -94,6 +121,13 @@ export class LineService implements ILineService {
     accessToken: string,
   ): Promise<SentMessage | LineErrorMessage> {
     return this.lineRepository.pushMessage(message, userId, accessToken);
+  }
+
+  loadingAnimation(
+    userId: string,
+    accessToken: string,
+  ): Promise<SentMessage | LineErrorMessage> {
+    return this.lineRepository.loadingAnimation(userId, accessToken);
   }
 
   switchStoreType = (receivedMessage: string): LineMessageType => {
@@ -246,6 +280,26 @@ export class LineService implements ILineService {
             },
           ],
         },
+      },
+    };
+  }
+
+  createQuickReply(message: string, items: QuickReplyTypes[]): TextMessage {
+    return {
+      type: 'text',
+      text: message,
+      quickReply: {
+        items: items.map((item) => {
+          return {
+            type: 'action',
+            imageUrl: item.imageUrl,
+            action: {
+              type: 'message',
+              label: item.text,
+              text: item.text,
+            },
+          };
+        }),
       },
     };
   }
