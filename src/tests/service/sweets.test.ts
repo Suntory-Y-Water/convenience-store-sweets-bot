@@ -1,5 +1,6 @@
 import { Constants } from '../../constants';
-import { diContainer } from '../../containers/diConfig';
+import { container } from '../../containers/inversify.config';
+import { TYPES } from '../../containers/inversify.types';
 import { ISweetsService } from '../../services/sweetsService';
 import { StoreType, Sweets } from '../../types';
 
@@ -50,7 +51,7 @@ const seed = async () => {
 describe('sweets repository tests', () => {
   let sweetsService: ISweetsService;
   beforeAll(() => {
-    sweetsService = diContainer.get('SweetsService');
+    sweetsService = container.get(TYPES.SweetsService);
   });
 
   beforeEach(() => {

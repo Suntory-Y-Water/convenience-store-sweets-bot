@@ -1,7 +1,6 @@
 import { Context, Hono } from 'hono';
 import { Bindings, Sweets, isLineErrorMessage } from './types';
-import { DIContainer } from './containers/diContainer';
-import { DependencyTypes, diContainer } from './containers/diConfig';
+import { container } from './containers/inversify.config';
 import {
   FlexMessage,
   TextMessage,
@@ -10,16 +9,20 @@ import {
 } from '@line/bot-sdk';
 import { Constants } from './constants';
 import { BlankInput } from 'hono/types';
+import { ISweetsService } from './services/sweetsService';
+import { ISweetsApiService } from './services/sweetsApiService';
+import { ILineService } from './services/lineService';
+import { TYPES } from './containers/inversify.types';
 
 const app = new Hono<{
   Variables: {
-    diContainer: DIContainer<DependencyTypes>;
+    container: typeof container;
   };
   Bindings: Bindings;
 }>().basePath('/api');
 
 app.use('*', (c, next) => {
-  c.set('diContainer', diContainer);
+  c.set('container', container);
   return next();
 });
 
@@ -29,13 +32,12 @@ app.get('/random', async (c) => {
     return c.json({ message: 'store_typeを指定してください' }, 400);
   }
 
-  // store_typeの値がSevenEleven, FamilyMart, Lawsonのいずれかでない場合はエラーを返す
   if (query !== 'SevenEleven' && query !== 'FamilyMart' && query !== 'Lawson') {
     return c.json({ message: 'store_typeの値が不正です' }, 400);
   }
 
-  const di = c.get('diContainer');
-  const sweetsService = di.get('SweetsService');
+  const container = c.get('container');
+  const sweetsService = container.get<ISweetsService>(TYPES.SweetsService);
   const data = await sweetsService.getRandomSweets(
     c.env.HONO_SWEETS,
     query,
@@ -58,7 +60,7 @@ const messageEvent = async (
   c: Context<
     {
       Variables: {
-        diContainer: DIContainer<DependencyTypes>;
+        container: typeof container;
       };
       Bindings: Bindings;
     },
@@ -69,10 +71,10 @@ const messageEvent = async (
 ) => {
   const events = data.events;
   const accessToken = c.env.CHANNEL_ACCESS_TOKEN;
-  const di = c.get('diContainer');
-  const lineService = di.get('LineService');
-  const sweetsService = di.get('SweetsService');
-  // 受け取ったメッセージを処理したあとに、LINEに返信する処理を行う
+  const container = c.get('container');
+  const lineService = container.get<ILineService>(TYPES.LineService);
+  const sweetsService = container.get<ISweetsService>(TYPES.SweetsService);
+
   await Promise.all(
     events.map(async (event: WebhookEvent) => {
       try {
@@ -80,7 +82,6 @@ const messageEvent = async (
         // ここでSweets情報を取得する処理を行う。取得したメッセージから店舗情報を取得する
         const messageDetail = lineService.switchStoreType(webhookEventHandlers.message);
 
-        // メッセージに店舗情報を含まない場合は、処理を終了する
         if (!messageDetail.store && messageDetail.productType === 'newProducts') {
           const quickReply = lineService.createQuickReply(
             Constants.MessageConstants.NEW_PRODUCTS_ESSAGEM,
@@ -92,7 +93,6 @@ const messageEvent = async (
             accessToken,
           );
         }
-
         // メッセージに店舗情報を含まない場合は、処理を終了する
         if (!messageDetail.store) {
           return;
@@ -156,7 +156,6 @@ const messageEvent = async (
             accessToken,
           );
 
-          // エラーメッセージが返ってきた場合はエラーログを出力してエラーメッセージを返す。
           if (isLineErrorMessage(response)) {
             console.error(response);
             const textMessage = lineService.createTextMessage(
@@ -187,9 +186,8 @@ const messageEvent = async (
 };
 
 export const scheduledEvent = async (env: Bindings) => {
-  const di = diContainer;
-  const sweetsService = di.get('SweetsService');
-  const sweetsApiService = di.get('SweetsApiService');
+  const sweetsService = container.get<ISweetsService>('SweetsService');
+  const sweetsApiService = container.get<ISweetsApiService>('SweetsApiService');
   const urlsParams = [
     {
       url: Constants.ConvenienceStoreItemUrl.sevenElevenWesternSweetsUrl,
@@ -222,7 +220,6 @@ export const scheduledEvent = async (env: Bindings) => {
     const sweetsData = await sweetsApiService.getSweetsDetail(sweetsDetailParams);
     allSweetsData.push(...sweetsData);
   }
-
   // KVに保存する前に既存のデータを全て削除
   await sweetsService.deleteSweets(env.HONO_SWEETS, Constants.PREFIX);
 

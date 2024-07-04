@@ -1,5 +1,6 @@
 import { Constants } from '../../constants';
-import { diContainer } from '../../containers/diConfig';
+import { container } from '../../containers/inversify.config';
+import { TYPES } from '../../containers/inversify.types';
 import { ISweetsRepository } from '../../repositories/sweetsRepository';
 import { Sweets } from '../../types';
 
@@ -51,7 +52,7 @@ describe('sweets repository tests', () => {
   let sweetsRepository: ISweetsRepository;
 
   beforeAll(() => {
-    sweetsRepository = diContainer.get('SweetsRepository');
+    sweetsRepository = container.get(TYPES.SweetsRepository);
   });
 
   beforeEach(() => {

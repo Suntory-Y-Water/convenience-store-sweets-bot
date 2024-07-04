@@ -1,5 +1,6 @@
 import { Constants } from '../../constants';
-import { diContainer } from '../../containers/diConfig';
+import { container } from '../../containers/inversify.config';
+import { TYPES } from '../../containers/inversify.types';
 import { SweetsApiRepository } from '../../repositories/sweetsApiRepository';
 
 // TODO: fetch関数のmock化がうまくできていないので、自分が過去に作成したAPIを利用してテストを行う
@@ -7,7 +8,7 @@ describe('SweetsApiRepository', () => {
   let sweetsApiRepository: SweetsApiRepository;
 
   beforeEach(() => {
-    sweetsApiRepository = diContainer.get('SweetsApiRepository');
+    sweetsApiRepository = container.get(TYPES.SweetsApiRepository);
   });
 
   test('fetchTextResponseが正しくデータを返却する', async () => {

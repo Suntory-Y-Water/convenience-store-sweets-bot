@@ -1,5 +1,6 @@
 import { Constants } from '../../constants';
-import { diContainer } from '../../containers/diConfig';
+import { container } from '../../containers/inversify.config';
+import { TYPES } from '../../containers/inversify.types';
 import { ISweetsApiService } from '../../services/sweetsApiService';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
@@ -8,7 +9,7 @@ describe('sweetsApi tests', () => {
   let sweetsApiService: ISweetsApiService;
 
   beforeEach(() => {
-    sweetsApiService = diContainer.get('SweetsApiService');
+    sweetsApiService = container.get(TYPES.SweetsApiService);
   });
 
   const testLoadHtml = (fileName: string) => {

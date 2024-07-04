@@ -1,3 +1,5 @@
+import { injectable } from 'inversify';
+import 'reflect-metadata';
 export interface ISweetsApiRepository {
   /**
    *
@@ -10,6 +12,7 @@ export interface ISweetsApiRepository {
   fetchTextResponse(url: string, headers?: Record<string, string>): Promise<string>;
 }
 
+@injectable()
 export class SweetsApiRepository implements ISweetsApiRepository {
   fetchTextResponse = async (
     apiUrl: string,

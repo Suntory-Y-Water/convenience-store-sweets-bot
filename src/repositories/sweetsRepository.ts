@@ -1,3 +1,4 @@
+import { injectable } from 'inversify';
 export interface ISweetsRepository {
   /**
    * @description KVストアに保存されたデータを全て削除する。
@@ -36,6 +37,7 @@ export interface ISweetsRepository {
   fetchItemKVStoreValue<T>(KV: KVNamespace, key: string): Promise<T | null>;
 }
 
+@injectable()
 export class SweetsRepository implements ISweetsRepository {
   fetchItemKVStoreKey = async (
     KV: KVNamespace<string>,

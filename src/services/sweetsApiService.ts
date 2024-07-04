@@ -1,6 +1,8 @@
+import { TYPES } from '../containers/inversify.types';
 import { ISweetsApiRepository } from '../repositories/sweetsApiRepository';
 import { GetSweetsDetailParams, ReleasePeriod, Sweets } from '../types';
-
+import { inject, injectable } from 'inversify';
+import 'reflect-metadata';
 export interface ISweetsApiService {
   /**
    *
@@ -71,12 +73,11 @@ export interface ISweetsApiService {
   };
 }
 
+@injectable()
 export class SweetsApiService implements ISweetsApiService {
-  private sweetsApiRepository: ISweetsApiRepository;
-  constructor(sweetsApiRepository: ISweetsApiRepository) {
-    this.sweetsApiRepository = sweetsApiRepository;
-  }
-
+  constructor(
+    @inject(TYPES.SweetsApiRepository) private sweetsApiRepository: ISweetsApiRepository,
+  ) {}
   fetchSweetsUrl = async (
     url: string,
     headers?: Record<string, string>,
