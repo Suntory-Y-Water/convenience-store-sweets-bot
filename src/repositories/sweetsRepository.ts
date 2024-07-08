@@ -1,4 +1,5 @@
 import { injectable } from 'inversify';
+import { KVException } from '../utils/exceptions';
 export interface ISweetsRepository {
   /**
    * @description KVストアに保存されたデータを全て削除する。
@@ -43,21 +44,27 @@ export class SweetsRepository implements ISweetsRepository {
     KV: KVNamespace<string>,
     params: string,
   ): Promise<KVNamespaceListResult<unknown, string>> => {
-    const prefix = params;
-    return await KV.list({ prefix });
+    try {
+      const prefix = params;
+      return await KV.list({ prefix });
+    } catch (error) {
+      throw new KVException(500, 'Failed to get key from KV', 'fetchItemKVStoreKey');
+    }
   };
 
   fetchItemKVStoreValue = async <T>(
     KV: KVNamespace<string>,
     key: string,
   ): Promise<T | null> => {
-    const lists = await KV.get<T>(key, 'json');
-
-    if (!lists) {
-      return null;
+    try {
+      const lists = await KV.get<T>(key, 'json');
+      if (!lists) {
+        return null;
+      }
+      return lists;
+    } catch (error) {
+      throw new KVException(500, 'Failed to get value from KV', 'fetchItemKVStoreValue');
     }
-
-    return lists;
   };
 
   deleteItemsKVStore = async (KV: KVNamespace, prefix: string): Promise<void> => {
@@ -67,8 +74,7 @@ export class SweetsRepository implements ISweetsRepository {
         await KV.delete(key.name);
       }
     } catch (error) {
-      console.error(`Failed to delete data: ${error}`);
-      return;
+      throw new KVException(500, 'Failed to delete data from KV', 'deleteItemsKVStore');
     }
   };
 
@@ -76,8 +82,11 @@ export class SweetsRepository implements ISweetsRepository {
     try {
       await KV.put(key, JSON.stringify(value));
     } catch (error) {
-      console.error(`Failed to put data: ${error}`);
-      return;
+      throw new KVException(
+        500,
+        `KV data update failed. key name is ${key}`,
+        'deleteItemsKVStore',
+      );
     }
   };
 }

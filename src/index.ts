@@ -13,6 +13,9 @@ import { ISweetsService } from './services/sweetsService';
 import { ISweetsApiService } from './services/sweetsApiService';
 import { ILineService } from './services/lineService';
 import { TYPES } from './containers/inversify.types';
+import { HTTPException } from 'hono/http-exception';
+import { errorHandler } from './middleware/errorHandler';
+import { injectDependencies } from './middleware/injectDependencies';
 
 const app = new Hono<{
   Variables: {
@@ -21,22 +24,20 @@ const app = new Hono<{
   Bindings: Bindings;
 }>().basePath('/api');
 
-app.use('*', (c, next) => {
-  c.set('container', container);
-  return next();
-});
+app.use('*', injectDependencies);
+
+app.onError(errorHandler);
 
 app.get('/random', async (c) => {
   const query = c.req.query('store_type');
   if (!query) {
-    return c.json({ message: 'store_typeを指定してください' }, 400);
+    throw new HTTPException(400, { message: 'store_typeを指定してください' });
   }
 
   if (query !== 'SevenEleven' && query !== 'FamilyMart' && query !== 'Lawson') {
-    return c.json({ message: 'store_typeの値が不正です' }, 400);
+    throw new HTTPException(400, { message: 'store_typeの値が不正です' });
   }
 
-  const container = c.get('container');
   const sweetsService = container.get<ISweetsService>(TYPES.SweetsService);
   const data = await sweetsService.getRandomSweets(
     c.env.HONO_SWEETS,
@@ -45,7 +46,7 @@ app.get('/random', async (c) => {
   );
 
   if (!data) {
-    return c.json({ message: 'データが存在しません' }, 404);
+    throw new HTTPException(404, { message: 'データが存在しません' });
   }
   return c.json(data, 200);
 });
@@ -71,7 +72,6 @@ const messageEvent = async (
 ) => {
   const events = data.events;
   const accessToken = c.env.CHANNEL_ACCESS_TOKEN;
-  const container = c.get('container');
   const lineService = container.get<ILineService>(TYPES.LineService);
   const sweetsService = container.get<ISweetsService>(TYPES.SweetsService);
 
