@@ -3,7 +3,6 @@ import { container } from '../../containers/inversify.config';
 import { TYPES } from '../../containers/inversify.types';
 import { SweetsApiRepository } from '../../repositories/sweetsApiRepository';
 
-// TODO: fetch関数のmock化がうまくできていないので、自分が過去に作成したAPIを利用してテストを行う
 describe('SweetsApiRepository', () => {
   let sweetsApiRepository: SweetsApiRepository;
 
@@ -33,7 +32,7 @@ describe('SweetsApiRepository', () => {
 
     // act and assert
     await expect(sweetsApiRepository.fetchTextResponse(apiUrl, headers)).rejects.toThrow(
-      `HTTP error! status: 404 url: ${apiUrl}`,
+      `Failed to fetch text response from url`,
     );
   });
 });

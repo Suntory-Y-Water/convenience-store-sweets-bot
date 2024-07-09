@@ -16,8 +16,8 @@ const container = new Container();
 container.bind<ILineRepository>(TYPES.LineRepository).to(LineRepository);
 container.bind<ILineService>(TYPES.LineService).to(LineService);
 container.bind<ISweetsApiRepository>(TYPES.SweetsApiRepository).to(SweetsApiRepository);
+container.bind<ISweetsApiService>(TYPES.SweetsApiService).to(SweetsApiService);
 container.bind<ISweetsRepository>(TYPES.SweetsRepository).to(SweetsRepository);
 container.bind<ISweetsService>(TYPES.SweetsService).to(SweetsService);
-container.bind<ISweetsApiService>(TYPES.SweetsApiService).to(SweetsApiService);
 
 export { container };

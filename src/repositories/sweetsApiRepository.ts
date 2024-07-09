@@ -1,3 +1,4 @@
+import { HTTPException } from 'hono/http-exception';
 import { injectable } from 'inversify';
 import 'reflect-metadata';
 export interface ISweetsApiRepository {
@@ -18,16 +19,23 @@ export class SweetsApiRepository implements ISweetsApiRepository {
     apiUrl: string,
     headers?: Record<string, string>,
   ): Promise<string> => {
-    const response = await fetch(apiUrl, {
-      headers: {
-        ...headers,
-      },
-    });
+    try {
+      const response = await fetch(apiUrl, {
+        headers: {
+          ...headers,
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status} url: ${apiUrl}`);
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        throw new HTTPException(500, {
+          message: `Failed to fetch response. response : ${errorResponse}`,
+        });
+      }
+
+      return await response.text();
+    } catch (error) {
+      throw new HTTPException(500, { message: 'Failed to fetch text response from url' });
     }
-
-    return await response.text();
   };
 }

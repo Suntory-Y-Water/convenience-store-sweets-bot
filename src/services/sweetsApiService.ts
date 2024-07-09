@@ -3,6 +3,7 @@ import { ISweetsApiRepository } from '../repositories/sweetsApiRepository';
 import { GetSweetsDetailParams, ReleasePeriod, Sweets } from '../types';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
+import { ParseException } from '../utils/exceptions';
 export interface ISweetsApiService {
   /**
    *
@@ -236,10 +237,10 @@ export class SweetsApiService implements ISweetsApiService {
       }
       return results;
     } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      }
-      return [];
+      throw new ParseException(
+        500,
+        `Failed to parse html. Failed to parse html. The failed store is ${params.storeType}`,
+      );
     }
   };
 }

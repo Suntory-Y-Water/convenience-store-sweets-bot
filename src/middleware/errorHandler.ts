@@ -1,5 +1,5 @@
 import { Context } from 'hono';
-import { KVException } from '../utils/exceptions';
+import { KVException, ParseException } from '../utils/exceptions';
 import { ErrorResponse } from '../types';
 import { HTTPException } from 'hono/http-exception';
 
@@ -15,7 +15,7 @@ export const errorHandler = (err: Error, c: Context) => {
       err.status,
     );
   }
-  if (err instanceof HTTPException) {
+  if (err instanceof HTTPException || err instanceof ParseException) {
     return c.json<ErrorResponse>(
       {
         message: err.message,

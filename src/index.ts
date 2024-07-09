@@ -186,8 +186,8 @@ const messageEvent = async (
 };
 
 export const scheduledEvent = async (env: Bindings) => {
-  const sweetsService = container.get<ISweetsService>('SweetsService');
-  const sweetsApiService = container.get<ISweetsApiService>('SweetsApiService');
+  const sweetsService = container.get<ISweetsService>(TYPES.SweetsService);
+  const sweetsApiService = container.get<ISweetsApiService>(TYPES.SweetsApiService);
   const urlsParams = [
     {
       url: Constants.ConvenienceStoreItemUrl.sevenElevenWesternSweetsUrl,
@@ -202,7 +202,15 @@ export const scheduledEvent = async (env: Bindings) => {
       params: Constants.ConvenienceStoreDetailParams.FAMILY_MART,
     },
     {
+      url: Constants.ConvenienceStoreItemUrl.familyMartJapaneseSweetsUrl,
+      params: Constants.ConvenienceStoreDetailParams.FAMILY_MART,
+    },
+    {
       url: Constants.ConvenienceStoreItemUrl.lawsonUrl,
+      params: Constants.ConvenienceStoreDetailParams.LAWSON,
+    },
+    {
+      url: Constants.ConvenienceStoreItemUrl.lawsonGateauSweetsUrl,
       params: Constants.ConvenienceStoreDetailParams.LAWSON,
     },
   ];
