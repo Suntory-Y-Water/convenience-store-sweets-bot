@@ -1,5 +1,40 @@
-# convenience-store-sweets-bot
+ありがとうございます。
 
-## 概要
+```json
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "lib": ["ESNext"],
+    "types": ["@cloudflare/workers-types", "@types/jest"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
+```
 
-大手コンビニ3社のスイーツ情報をランダムに表示するLINE BOT
+```yml
+name: Test
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run test
+        run: pnpm run test
+```

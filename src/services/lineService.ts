@@ -1,3 +1,5 @@
+import { injectable, inject } from 'inversify';
+import 'reflect-metadata';
 import { FlexMessage, TextMessage, WebhookEvent } from '@line/bot-sdk';
 import { ILineRepository } from '../repositories/lineRepository';
 import {
@@ -10,6 +12,7 @@ import {
   StoreType,
   Sweets,
 } from '../types';
+import { TYPES } from '../containers/inversify.types';
 
 export interface ILineService {
   /**
@@ -87,11 +90,9 @@ export interface ILineService {
   createQuickReply(message: string, items: QuickReplyTypes[]): TextMessage;
 }
 
+@injectable()
 export class LineService implements ILineService {
-  private lineRepository: ILineRepository;
-  constructor(lineRepository: ILineRepository) {
-    this.lineRepository = lineRepository;
-  }
+  constructor(@inject(TYPES.LineRepository) private lineRepository: ILineRepository) {}
 
   textEventHandler = async (event: WebhookEvent): Promise<MessageEventHandler> => {
     if (event.type !== 'message' || event.message.type !== 'text') {

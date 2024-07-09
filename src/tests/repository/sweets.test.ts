@@ -1,7 +1,9 @@
 import { Constants } from '../../constants';
-import { diContainer } from '../../containers/diConfig';
+import { container } from '../../containers/inversify.config';
+import { TYPES } from '../../containers/inversify.types';
 import { ISweetsRepository } from '../../repositories/sweetsRepository';
 import { Sweets } from '../../types';
+import { KVException } from '../../utils/exceptions';
 
 const env = getMiniflareBindings();
 const sweetsList: Sweets[] = [
@@ -51,7 +53,7 @@ describe('sweets repository tests', () => {
   let sweetsRepository: ISweetsRepository;
 
   beforeAll(() => {
-    sweetsRepository = diContainer.get('SweetsRepository');
+    sweetsRepository = container.get(TYPES.SweetsRepository);
   });
 
   beforeEach(() => {
@@ -139,5 +141,39 @@ describe('sweets repository tests', () => {
       const lists = await env.HONO_SWEETS.list({ prefix });
       expect(lists.keys.length).toBe(0);
     }
+  });
+
+  test('fetchItemKVStoreKey データ取得に失敗したとき、KVExceptionがスローされる', async () => {
+    // arrange
+    const prefix = Constants.PREFIX;
+    const storeType = 'SevenEleven';
+    env.HONO_SWEETS.list = jest
+      .fn()
+      .mockRejectedValue(new Error('Failed to get key from KV'));
+
+    // act and assert
+    await expect(
+      sweetsRepository.fetchItemKVStoreKey(env.HONO_SWEETS, prefix + storeType),
+    ).rejects.toThrow(KVException);
+
+    await expect(
+      sweetsRepository.fetchItemKVStoreKey(env.HONO_SWEETS, prefix + storeType),
+    ).rejects.toThrow('Failed to get key from KV');
+  });
+
+  test('fetchItemKVStoreValue データ取得に失敗したとき、KVExceptionがスローされる', async () => {
+    // arrange
+    const key = 'hoge';
+    env.HONO_SWEETS.get = jest
+      .fn()
+      .mockRejectedValue(new Error('Failed to get value from KV'));
+    // act and assert
+    await expect(
+      sweetsRepository.fetchItemKVStoreValue<Sweets>(env.HONO_SWEETS, key),
+    ).rejects.toThrow(KVException);
+
+    await expect(
+      sweetsRepository.fetchItemKVStoreValue<Sweets>(env.HONO_SWEETS, key),
+    ).rejects.toThrow('Failed to get value from KV');
   });
 });

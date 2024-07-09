@@ -106,3 +106,9 @@ export interface Sweets {
   };
   storeType: StoreType;
 }
+
+export type ErrorResponse = {
+  message: string;
+  method?: string;
+  timestamp: string;
+};
