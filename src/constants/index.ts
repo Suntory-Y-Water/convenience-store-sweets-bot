@@ -20,12 +20,21 @@ export class Constants {
   };
 
   static readonly ConvenienceStoreItemUrl = {
+    /** セブンイレブンの洋菓子ページ */
     sevenElevenWesternSweetsUrl:
       'https://www.sej.co.jp/products/a/cat/060010010000000/kanto/1/l100/',
+    /** セブンイレブンの和菓子ページ */
     sevenElevenJapaneseSweetsUrl:
       'https://www.sej.co.jp/products/a/cat/060010020000000/kanto/1/l100/',
+    /** ファミリーマートの洋菓子ページ */
     familyMartUrl: 'https://www.family.co.jp/goods/dessert.html',
+    /** ファミリーマートの和菓子ページ */
+    familyMartJapaneseSweetsUrl: 'https://www.family.co.jp/goods/baked_sweets.html',
+    /** ローソンの洋菓子、和菓子ページ */
     lawsonUrl: 'https://www.lawson.co.jp/recommend/original/dessert/',
+    /** ローソンの焼き菓子ページ */
+    lawsonGateauSweetsUrl:
+      'https://www.lawson.co.jp/recommend/original/gateau/index.html',
   };
 
   static readonly SEVEN_ELEVEN: ItemDetailSelector = {

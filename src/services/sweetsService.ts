@@ -1,7 +1,10 @@
+import { injectable, inject } from 'inversify';
+import 'reflect-metadata';
 import { Constants } from '../constants';
 import { ISweetsRepository } from '../repositories/sweetsRepository';
 import { Sweets } from '../types';
 import { Cache } from '../utils/cache';
+import { TYPES } from '../containers/inversify.types';
 
 export interface ISweetsService {
   /**
@@ -29,12 +32,14 @@ export interface ISweetsService {
   deleteSweets(KV: KVNamespace, prefix: string): Promise<void>;
 }
 
+@injectable()
 export class SweetsService implements ISweetsService {
-  private sweetsRepository: ISweetsRepository;
   private cache: Cache<Sweets[]>;
   private randomSweetsCache: Cache<KVNamespaceListResult<unknown, string>>;
-  constructor(sweetsRepository: ISweetsRepository) {
-    this.sweetsRepository = sweetsRepository;
+
+  constructor(
+    @inject(TYPES.SweetsRepository) private sweetsRepository: ISweetsRepository,
+  ) {
     this.cache = new Cache<Sweets[]>(Constants.CACHE_TTL);
     this.randomSweetsCache = new Cache<KVNamespaceListResult<unknown, string>>(
       Constants.CACHE_TTL,

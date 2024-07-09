@@ -1,3 +1,5 @@
+import { injectable } from 'inversify';
+import 'reflect-metadata';
 import { Constants } from '../constants';
 import { LineErrorMessage, SentMessage } from '../types';
 
@@ -39,7 +41,7 @@ export interface ILineRepository {
     accessToken: string,
   ): Promise<SentMessage | LineErrorMessage>;
 }
-
+@injectable()
 export class LineRepository implements ILineRepository {
   private async sendRequest(
     endpoint: string,

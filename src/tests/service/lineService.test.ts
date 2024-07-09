@@ -1,10 +1,11 @@
-import { diContainer } from '../../containers/diConfig';
+import { container } from '../../containers/inversify.config';
+import { TYPES } from '../../containers/inversify.types';
 import { ILineService } from '../../services/lineService';
 
 describe('lineService', () => {
   let lineService: ILineService;
   beforeAll(() => {
-    lineService = diContainer.get('LineService');
+    lineService = container.get(TYPES.LineService);
   });
 
   test('switchStoreType tests ◯◯のスイーツの場合、セブンイレブンとスイーツが返却される', () => {
