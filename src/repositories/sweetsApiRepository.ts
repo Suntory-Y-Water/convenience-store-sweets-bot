@@ -34,7 +34,7 @@ export class SweetsApiRepository implements ISweetsApiRepository {
       }
 
       return await response.text();
-    } catch (error) {
+    } catch {
       throw new HTTPException(500, { message: 'Failed to fetch text response from url' });
     }
   };

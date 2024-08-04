@@ -47,7 +47,7 @@ export class SweetsRepository implements ISweetsRepository {
     try {
       const prefix = params;
       return await KV.list({ prefix });
-    } catch (error) {
+    } catch {
       throw new KVException(500, 'Failed to get key from KV', 'fetchItemKVStoreKey');
     }
   };
@@ -62,7 +62,7 @@ export class SweetsRepository implements ISweetsRepository {
         return null;
       }
       return lists;
-    } catch (error) {
+    } catch {
       throw new KVException(500, 'Failed to get value from KV', 'fetchItemKVStoreValue');
     }
   };
@@ -73,7 +73,7 @@ export class SweetsRepository implements ISweetsRepository {
       for (const key of list.keys) {
         await KV.delete(key.name);
       }
-    } catch (error) {
+    } catch {
       throw new KVException(500, 'Failed to delete data from KV', 'deleteItemsKVStore');
     }
   };
@@ -81,7 +81,7 @@ export class SweetsRepository implements ISweetsRepository {
   putItemKVStore = async <T>(KV: KVNamespace, key: string, value: T): Promise<void> => {
     try {
       await KV.put(key, JSON.stringify(value));
-    } catch (error) {
+    } catch {
       throw new KVException(
         500,
         `KV data update failed. key name is ${key}`,

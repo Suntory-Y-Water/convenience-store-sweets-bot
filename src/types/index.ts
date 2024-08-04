@@ -33,7 +33,9 @@ export interface LineMessageType {
   productType: ProductType | null;
 }
 
-export const isLineErrorMessage = (response: any): response is LineErrorMessage => {
+export const isLineErrorMessage = (
+  response: SentMessage | LineErrorMessage,
+): response is LineErrorMessage => {
   return (response as LineErrorMessage).message !== undefined;
 };
 

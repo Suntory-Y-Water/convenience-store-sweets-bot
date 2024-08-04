@@ -14,9 +14,9 @@ export class MockLineRepository implements ILineRepository {
   };
 
   replyMessage = async <T>(
-    message: T,
+    _message: T,
     replyToken: string,
-    accessToken: string,
+    _accessToken: string,
   ): Promise<LineErrorMessage | SentMessage> => {
     if (replyToken === 'error') {
       return this.errorMessage;
@@ -25,9 +25,9 @@ export class MockLineRepository implements ILineRepository {
   };
 
   pushMessage = async <T>(
-    message: T,
+    _message: T,
     userId: string,
-    accessToken: string,
+    _accessToken: string,
   ): Promise<LineErrorMessage | SentMessage> => {
     if (userId === 'error') {
       return this.errorMessage;
@@ -37,7 +37,7 @@ export class MockLineRepository implements ILineRepository {
 
   loadingAnimation = async (
     userId: string,
-    accessToken: string,
+    _accessToken: string,
   ): Promise<LineErrorMessage | SentMessage> => {
     if (userId === 'error') {
       return this.errorMessage;
