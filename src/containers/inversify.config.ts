@@ -10,6 +10,7 @@ import { ISweetsRepository, SweetsRepository } from '../repositories/sweetsRepos
 import { SweetsService, ISweetsService } from '../services/sweetsService';
 import { SweetsApiService, ISweetsApiService } from '../services/sweetsApiService';
 import { TYPES } from './inversify.types';
+import { LoggingService } from '../services/loggingService';
 
 const container = new Container();
 
@@ -19,5 +20,6 @@ container.bind<ISweetsApiRepository>(TYPES.SweetsApiRepository).to(SweetsApiRepo
 container.bind<ISweetsApiService>(TYPES.SweetsApiService).to(SweetsApiService);
 container.bind<ISweetsRepository>(TYPES.SweetsRepository).to(SweetsRepository);
 container.bind<ISweetsService>(TYPES.SweetsService).to(SweetsService);
+container.bind<LoggingService>(TYPES.LoggingService).to(LoggingService);
 
 export { container };
