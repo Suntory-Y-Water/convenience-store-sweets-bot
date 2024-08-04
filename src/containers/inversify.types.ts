@@ -5,6 +5,7 @@ const TYPES = {
   SweetsApiService: Symbol.for('SweetsApiService'),
   SweetsRepository: Symbol.for('SweetsRepository'),
   SweetsService: Symbol.for('SweetsService'),
+  LoggingService: Symbol.for('LoggingService'),
 };
 
 export { TYPES };
