@@ -16,6 +16,7 @@ import { HTTPException } from 'hono/http-exception';
 import { errorHandler } from './middleware/errorHandler';
 import { injectDependencies } from './middleware/injectDependencies';
 import { BlankInput } from 'hono/types';
+import { ILoggingService } from './services/loggingService';
 
 const app = new Hono<{
   Variables: {
@@ -29,12 +30,15 @@ app.use('*', injectDependencies);
 app.onError(errorHandler);
 
 app.get('/random', async (c) => {
+  const loggingService = container.get<ILoggingService>(TYPES.LoggingService);
   const query = c.req.query('store_type');
   if (!query) {
+    loggingService.error('/random', 'store_typeを指定してください');
     throw new HTTPException(400, { message: 'store_typeを指定してください' });
   }
 
   if (query !== 'SevenEleven' && query !== 'FamilyMart' && query !== 'Lawson') {
+    loggingService.error('/random', 'store_typeの値が不正です');
     throw new HTTPException(400, { message: 'store_typeの値が不正です' });
   }
 
@@ -48,6 +52,7 @@ app.get('/random', async (c) => {
   if (!data) {
     throw new HTTPException(404, { message: 'データが存在しません' });
   }
+  loggingService.log('/random', '取得したスイーツ情報', data);
   return c.json(data, 200);
 });
 
@@ -74,6 +79,7 @@ const messageEvent = async (
   const accessToken = c.env.CHANNEL_ACCESS_TOKEN;
   const lineService = container.get<ILineService>(TYPES.LineService);
   const sweetsService = container.get<ISweetsService>(TYPES.SweetsService);
+  const loggingService = container.get<ILoggingService>(TYPES.LoggingService);
 
   await Promise.all(
     events.map(async (event: WebhookEvent) => {
@@ -112,6 +118,7 @@ const messageEvent = async (
             const textMessage = lineService.createTextMessage(
               Constants.MessageConstants.NOT_SWEETS_MESSAGE,
             );
+            loggingService.log('/webhook', Constants.MessageConstants.NOT_SWEETS_MESSAGE);
             await lineService.replyMessage<TextMessage>(
               textMessage,
               webhookEventHandlers.replyToken,
@@ -161,6 +168,7 @@ const messageEvent = async (
             const textMessage = lineService.createTextMessage(
               Constants.MessageConstants.ERROR_MESSAGE,
             );
+            loggingService.log('/webhook', Constants.MessageConstants.ERROR_MESSAGE);
             await lineService.pushMessage<TextMessage>(
               textMessage,
               webhookEventHandlers.replyToken,

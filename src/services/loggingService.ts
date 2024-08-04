@@ -8,34 +8,43 @@ enum LogLevel {
 }
 
 export interface ILoggingService {
-  log(message: any): void;
-  error(message: any): void;
+  log(methodName: string, ...messages: any[]): void;
+  error(methodName: string, ...messages: any[]): void;
 }
 
 @injectable()
 export class LoggingService implements ILoggingService {
-  log(message: any): void {
-    this.printLog(LogLevel.INFO, this.stringifyMessage(message));
+  log(methodName: string, ...messages: any[]): void {
+    this.printLog(LogLevel.INFO, methodName, this.stringifyMessages(messages));
   }
 
-  error(message: any): void {
-    this.printLog(LogLevel.ERROR, this.stringifyMessage(message));
+  error(methodName: string, ...messages: any[]): void {
+    this.printLog(LogLevel.ERROR, methodName, this.stringifyMessages(messages));
   }
 
-  private printLog(level: LogLevel, message: string): void {
+  private printLog(level: LogLevel, methodName: string, message: string): void {
     const timestamp = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
-    const formattedMessage = this.formatLog(level, timestamp, message);
+    const formattedMessage = this.formatLog(level, timestamp, methodName, message);
     console.log(formattedMessage);
   }
 
-  private formatLog(level: LogLevel, timestamp: string, message: string): string {
-    return `${timestamp} ${level} ${message}`;
+  private formatLog(
+    level: LogLevel,
+    timestamp: string,
+    methodName: string,
+    message: string,
+  ): string {
+    return `${timestamp} ${level} [${methodName}] ${message}`;
   }
 
-  private stringifyMessage(message: any): string {
-    if (typeof message === 'object') {
-      return JSON.stringify(message, null, 2);
-    }
-    return String(message);
+  private stringifyMessages(messages: any[]): string {
+    return messages
+      .map((message) => {
+        if (typeof message === 'object' && message !== null) {
+          return JSON.stringify(message, null, 2);
+        }
+        return String(message);
+      })
+      .join(' ');
   }
 }
