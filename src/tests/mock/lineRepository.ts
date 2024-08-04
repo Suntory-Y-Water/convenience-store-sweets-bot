@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { injectable } from 'inversify';
 import 'reflect-metadata';
 import { LineErrorMessage, SentMessage } from '../../types';

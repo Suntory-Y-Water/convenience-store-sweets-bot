@@ -8,7 +8,6 @@ import {
   WebhookRequestBody,
 } from '@line/bot-sdk';
 import { Constants } from './constants';
-import { BlankInput } from 'hono/types';
 import { ISweetsService } from './services/sweetsService';
 import { ISweetsApiService } from './services/sweetsApiService';
 import { ILineService } from './services/lineService';
@@ -16,6 +15,7 @@ import { TYPES } from './containers/inversify.types';
 import { HTTPException } from 'hono/http-exception';
 import { errorHandler } from './middleware/errorHandler';
 import { injectDependencies } from './middleware/injectDependencies';
+import { BlankInput } from 'hono/types';
 
 const app = new Hono<{
   Variables: {
@@ -219,11 +219,11 @@ export const scheduledEvent = async (env: Bindings) => {
     'User-Agent': Constants.USER_AGENT,
   };
   // 全てのURLに対して順番にデータを取得
-  for (const { url, params } of urlsParams) {
-    const response = await sweetsApiService.fetchSweetsUrl(url, headers);
+  for (const urlsParam of urlsParams) {
+    const response = await sweetsApiService.fetchSweetsUrl(urlsParam.url, headers);
     const sweetsDetailParams = {
       responseHtml: response,
-      ...params,
+      ...urlsParam.params,
     };
     const sweetsData = await sweetsApiService.getSweetsDetail(sweetsDetailParams);
     allSweetsData.push(...sweetsData);

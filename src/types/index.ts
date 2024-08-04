@@ -33,8 +33,6 @@ export interface LineMessageType {
   productType: ProductType | null;
 }
 
-// TODO:なんでここにいる？
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isLineErrorMessage = (response: any): response is LineErrorMessage => {
   return (response as LineErrorMessage).message !== undefined;
 };

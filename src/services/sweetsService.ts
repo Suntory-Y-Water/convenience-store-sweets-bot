@@ -23,12 +23,31 @@ export interface ISweetsService {
    * @memberof ISweetsService
    */
   filterNewSweets(sweetsArray: Sweets[]): Sweets[];
+  /**
+   * @description KVストアからランダムに1つのスイーツ情報を取得する。
+   * @param {KVNamespace} KV
+   * @param {string} storeType
+   * @param {string} prefix
+   */
   getRandomSweets(
     KV: KVNamespace,
     storeType: string,
     prefix: string,
   ): Promise<Sweets | null>;
+
+  /**
+   * @description KVストアにスイーツ情報を登録する。
+   * @param {KVNamespace} KV
+   * @param {string} prefix
+   * @param {Sweets[]} sweets
+   */
   createSweets(KV: KVNamespace, prefix: string, sweets: Sweets[]): Promise<void>;
+
+  /**
+   * @description KVストアから指定したprefixのスイーツ情報を全て削除する。
+   * @param {KVNamespace} KV
+   * @param {string} prefix
+   */
   deleteSweets(KV: KVNamespace, prefix: string): Promise<void>;
 }
 
