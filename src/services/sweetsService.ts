@@ -5,6 +5,7 @@ import { ISweetsRepository } from '../repositories/sweetsRepository';
 import { Sweets } from '../types';
 import { Cache } from '../utils/cache';
 import { TYPES } from '../containers/inversify.types';
+import { ILoggingService } from './loggingService';
 
 export interface ISweetsService {
   /**
@@ -58,6 +59,7 @@ export class SweetsService implements ISweetsService {
 
   constructor(
     @inject(TYPES.SweetsRepository) private sweetsRepository: ISweetsRepository,
+    @inject(TYPES.LoggingService) private loggingService: ILoggingService,
   ) {
     this.cache = new Cache<Sweets[]>(Constants.CACHE_TTL);
     this.randomSweetsCache = new Cache<KVNamespaceListResult<unknown, string>>(
@@ -84,7 +86,8 @@ export class SweetsService implements ISweetsService {
           list.name,
         );
         if (item === null) {
-          throw new Error('Item is null');
+          this.loggingService.error('商品が存在しません');
+          throw new Error('商品が存在しません');
         }
         return item;
       });
@@ -94,7 +97,9 @@ export class SweetsService implements ISweetsService {
       return data;
     } catch (error) {
       if (error instanceof Error) {
-        console.error(`スイーツの情報取得に失敗しました : ${error.message}`);
+        this.loggingService.error(
+          `スイーツの情報の取得に失敗しました : ${error.message}`,
+        );
       }
       return null;
     }
@@ -139,6 +144,7 @@ export class SweetsService implements ISweetsService {
         // キャッシュにデータがない場合、KVストアからデータを取得してキャッシュに保存
         lists = await this.sweetsRepository.fetchItemKVStoreKey(KV, params);
         this.randomSweetsCache.set(cacheKey, lists);
+        this.loggingService.log('getRandomSweets', 'キャッシュからデータを取得します');
       }
 
       if (lists.keys.length === 0) {
