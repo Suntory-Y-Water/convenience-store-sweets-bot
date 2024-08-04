@@ -236,7 +236,7 @@ export class SweetsApiService implements ISweetsApiService {
         results.push(currentProduct);
       }
       return results;
-    } catch (error) {
+    } catch {
       throw new ParseException(
         500,
         `Failed to parse html. Failed to parse html. The failed store is ${params.storeType}`,

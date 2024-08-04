@@ -18,7 +18,7 @@ export class KVException extends Error {
 
 /**
  * @description htmlパース時に使用するエラークラス
- * @class KVException
+ * @class ParseException
  * @extends {Error}
  */
 export class ParseException extends Error {
