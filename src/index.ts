@@ -152,6 +152,7 @@ const messageEvent = async (
               webhookEventHandlers.replyToken,
               accessToken,
             );
+            loggingService.log('/webhook', '新商品メッセージの送信を終了します。');
             return;
           }
 
@@ -164,11 +165,11 @@ const messageEvent = async (
           );
 
           if (isLineErrorMessage(response)) {
-            console.error(response);
+            loggingService.error('/webhook', response.message);
             const textMessage = lineService.createTextMessage(
               Constants.MessageConstants.ERROR_MESSAGE,
             );
-            loggingService.log('/webhook', Constants.MessageConstants.ERROR_MESSAGE);
+            loggingService.error('/webhook', Constants.MessageConstants.ERROR_MESSAGE);
             await lineService.pushMessage<TextMessage>(
               textMessage,
               webhookEventHandlers.replyToken,

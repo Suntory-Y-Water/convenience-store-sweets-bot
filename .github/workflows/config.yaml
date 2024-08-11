@@ -3,13 +3,14 @@ name: CI
 on:
   push:
     branches:
-      - '**' # 全てのブランチでテストとlintを実行
+      - '**'
   pull_request:
     branches:
-      - main # mainブランチへのPR作成時にテストとlintを実行
+      - main
 
 jobs:
   test_and_lint:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +29,7 @@ jobs:
         run: pnpm run lint
 
   deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
     runs-on: ubuntu-latest
 
     steps:
