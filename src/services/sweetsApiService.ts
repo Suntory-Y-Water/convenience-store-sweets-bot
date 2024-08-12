@@ -1,3 +1,4 @@
+import { decode } from 'html-entities';
 import { TYPES } from '../containers/inversify.types';
 import { ISweetsApiRepository } from '../repositories/sweetsApiRepository';
 import { GetSweetsDetailParams, ReleasePeriod, Sweets } from '../types';
@@ -87,13 +88,7 @@ export class SweetsApiService implements ISweetsApiService {
   };
 
   parseName(text: string): string {
-    return text
-      .replace(/&quot;/g, '"')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&nbsp;/g, ' ')
-      .trim();
+    return decode(text).trim();
   }
 
   parsePrice(text: string): string {

@@ -23,7 +23,7 @@ export interface ISweetsService {
    * @return {*}  {Sweets[]}
    * @memberof ISweetsService
    */
-  filterNewSweets(sweetsArray: Sweets[]): Sweets[];
+  filterNewSweets(sweetsArray: Sweets[]): Sweets[] | null;
   /**
    * @description KVストアからランダムに1つのスイーツ情報を取得する。
    * @param {KVNamespace} KV
@@ -105,8 +105,17 @@ export class SweetsService implements ISweetsService {
     }
   };
 
-  filterNewSweets = (sweetsArray: Sweets[]): Sweets[] => {
-    return sweetsArray
+  filterNewSweets = (sweetsArray: Sweets[]): Sweets[] | null => {
+    // すべてのSweetsアイテムのmetadataが空である場合、nullを返却する
+    const allMetadataEmpty = sweetsArray.every(
+      (sweets) => !sweets.metadata || Object.keys(sweets.metadata).length === 0,
+    );
+    if (allMetadataEmpty) {
+      return null;
+    }
+
+    // metadataが空でない場合にフィルタリングとソートを実行する
+    const filteredSweets = sweetsArray
       .filter((sweets) => sweets.metadata?.isNew === true)
       .sort((a, b) => {
         const releaseOrder = { this_week: 0, next_week: 1 };
@@ -128,6 +137,8 @@ export class SweetsService implements ISweetsService {
 
         return 0;
       });
+
+    return filteredSweets;
   };
 
   getRandomSweets = async (

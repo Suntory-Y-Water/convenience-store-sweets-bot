@@ -147,4 +147,104 @@ describe('sweets repository tests', () => {
       }),
     );
   });
+
+  test('filterNewSweets tests 新商品スイーツのみを返却する。', async () => {
+    // arrange
+    const sweets: Sweets[] = [
+      {
+        id: 'Lawson05b8bf45-848b-4f1a-ae77-10b3d9805a72',
+        itemName: 'Uchi Café×猿田彦珈琲　カフェラテロールケーキ(コーヒーゼリー入り)',
+        itemPrice: '268円(税込)',
+        itemImage: 'https://www.lawson.co.jp/recommend/original/detail/img/l763344.jpg',
+        itemHref: 'https://www.lawson.co.jp/recommend/original/detail/1490171_1996.html',
+        storeType: 'Lawson',
+        metadata: {},
+      },
+      {
+        id: 'Lawson942b306b-8982-4a5a-9591-0d2176ab9c72',
+        itemName: 'Uchi Café×猿田彦珈琲　珈琲ティラミスタルト',
+        itemPrice: '235円(税込)',
+        itemImage: 'https://www.lawson.co.jp/recommend/original/detail/img/l760315.jpg',
+        itemHref: 'https://www.lawson.co.jp/recommend/original/detail/1490170_1996.html',
+        storeType: 'Lawson',
+        metadata: {
+          isNew: true,
+          releasePeriod: 'this_week',
+        },
+      },
+      {
+        id: 'Lawson6dcb0d36-1e3d-4739-b52e-91b89382cf3f',
+        itemName: 'ふわ濃チーズケーキ　アールグレイ',
+        itemPrice: '297円(税込)',
+        itemImage: 'https://www.lawson.co.jp/recommend/original/detail/img/l762723.jpg',
+        itemHref: 'https://www.lawson.co.jp/recommend/original/detail/1490384_1996.html',
+        storeType: 'Lawson',
+        metadata: {
+          isNew: true,
+          releasePeriod: 'next_week',
+        },
+      },
+    ];
+
+    // act
+    const result = sweetsService.filterNewSweets(sweets);
+
+    // assert
+    expect(result).toEqual([
+      {
+        id: 'Lawson942b306b-8982-4a5a-9591-0d2176ab9c72',
+        itemName: 'Uchi Café×猿田彦珈琲　珈琲ティラミスタルト',
+        itemPrice: '235円(税込)',
+        itemImage: 'https://www.lawson.co.jp/recommend/original/detail/img/l760315.jpg',
+        itemHref: 'https://www.lawson.co.jp/recommend/original/detail/1490170_1996.html',
+        storeType: 'Lawson',
+        metadata: {
+          isNew: true,
+          releasePeriod: 'this_week',
+        },
+      },
+      {
+        id: 'Lawson6dcb0d36-1e3d-4739-b52e-91b89382cf3f',
+        itemName: 'ふわ濃チーズケーキ　アールグレイ',
+        itemPrice: '297円(税込)',
+        itemImage: 'https://www.lawson.co.jp/recommend/original/detail/img/l762723.jpg',
+        itemHref: 'https://www.lawson.co.jp/recommend/original/detail/1490384_1996.html',
+        storeType: 'Lawson',
+        metadata: {
+          isNew: true,
+          releasePeriod: 'next_week',
+        },
+      },
+    ]);
+  });
+
+  test('filterNewSweets tests 新商品がない場合はnullを返却する', async () => {
+    // arrange
+    const sweets: Sweets[] = [
+      {
+        id: 'Lawson05b8bf45-848b-4f1a-ae77-10b3d9805a72',
+        itemName: 'Uchi Café×猿田彦珈琲　カフェラテロールケーキ(コーヒーゼリー入り)',
+        itemPrice: '268円(税込)',
+        itemImage: 'https://www.lawson.co.jp/recommend/original/detail/img/l763344.jpg',
+        itemHref: 'https://www.lawson.co.jp/recommend/original/detail/1490171_1996.html',
+        storeType: 'Lawson',
+        metadata: {},
+      },
+      {
+        id: 'Lawson942b306b-8982-4a5a-9591-0d2176ab9c72',
+        itemName: 'Uchi Café×猿田彦珈琲　珈琲ティラミスタルト',
+        itemPrice: '235円(税込)',
+        itemImage: 'https://www.lawson.co.jp/recommend/original/detail/img/l760315.jpg',
+        itemHref: 'https://www.lawson.co.jp/recommend/original/detail/1490170_1996.html',
+        storeType: 'Lawson',
+        metadata: {},
+      },
+    ];
+
+    // act
+    const result = sweetsService.filterNewSweets(sweets);
+
+    // assert
+    expect(result).toBeNull();
+  });
 });
