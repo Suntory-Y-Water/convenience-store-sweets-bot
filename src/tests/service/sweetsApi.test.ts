@@ -4,6 +4,7 @@ import { TYPES } from '../../containers/inversify.types';
 import { ISweetsApiService } from '../../services/sweetsApiService';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { Sweets } from '../../types';
 
 describe('sweetsApi tests', () => {
   let sweetsApiService: ISweetsApiService;
@@ -208,5 +209,117 @@ describe('sweetsApi tests', () => {
 
     // act
     expect(sweetsApiService.isNewProductTextString(noText)).toEqual({});
+  });
+
+  test('filterSevenElevenNewSweets セブンイレブンで来週の新商品が取得できているか', async () => {
+    // arrange
+    const params = Constants.ConvenienceStoreDetailParams.SEVEN_ELEVEN;
+    const sevenElevenHtml = testLoadHtml('sevenElevenNewItem.html');
+    const sweetsDetailParams = {
+      responseHtml: sevenElevenHtml,
+      ...params,
+    };
+    const data = await sweetsApiService.getSweetsDetail(sweetsDetailParams);
+
+    // act
+    const newSweets = sweetsApiService.filterSevenElevenNewSweets(data);
+
+    // assert
+    expect(newSweets).toEqual([
+      {
+        itemName: 'バニラビーンズ使用　　黄金色スイートポテト',
+        itemPrice: '198円（税込213.84円）',
+        itemImage:
+          'https://img.7api-01.dp1.sej.co.jp/item-image/110940/08496C575DD16E99DAC59982CB751B10.jpg',
+        itemHref: 'https://www.sej.co.jp/products/a/item/110940/kanto/',
+        storeType: 'SevenEleven',
+        metadata: { isNew: true, releasePeriod: 'this_week' },
+      },
+      {
+        itemName: 'グリコ　　　　　　　　Ｂｉｇプッチンプリン',
+        itemPrice: '165円（税込178.20円）',
+        itemImage:
+          'https://img.7api-01.dp1.sej.co.jp/item-image/111013/07B520E7AE72067E2EB30318E3E0C7DB.jpg',
+        itemHref: 'https://www.sej.co.jp/products/a/item/111013/kanto/',
+        storeType: 'SevenEleven',
+        metadata: { isNew: true, releasePeriod: 'this_week' },
+      },
+      {
+        itemName: 'もっちりみるくわらび　宇治抹茶',
+        itemPrice: '250円（税込270円）',
+        itemImage:
+          'https://img.7api-01.dp1.sej.co.jp/item-image/110786/10BB09D1D78140DFEBE4BA73FE45E3AE.jpg',
+        itemHref: 'https://www.sej.co.jp/products/a/item/110786/kanto/',
+        storeType: 'SevenEleven',
+        metadata: { isNew: true, releasePeriod: 'this_week' },
+      },
+    ]);
+  });
+
+  test('metadataReleasePeriodConvert tests 今週の新商品を来週の新商品に変換する', () => {
+    // arrange
+    const sweets: Sweets[] = [
+      {
+        itemName: 'バニラビーンズ使用　　黄金色スイートポテト',
+        itemPrice: '198円（税込213.84円）',
+        itemImage:
+          'https://img.7api-01.dp1.sej.co.jp/item-image/110940/08496C575DD16E99DAC59982CB751B10.jpg',
+        itemHref: 'https://www.sej.co.jp/products/a/item/110940/kanto/',
+        storeType: 'SevenEleven',
+        metadata: { isNew: true, releasePeriod: 'this_week' },
+      },
+      {
+        itemName: 'グリコ　　　　　　　　Ｂｉｇプッチンプリン',
+        itemPrice: '165円（税込178.20円）',
+        itemImage:
+          'https://img.7api-01.dp1.sej.co.jp/item-image/111013/07B520E7AE72067E2EB30318E3E0C7DB.jpg',
+        itemHref: 'https://www.sej.co.jp/products/a/item/111013/kanto/',
+        storeType: 'SevenEleven',
+        metadata: { isNew: true, releasePeriod: 'this_week' },
+      },
+      {
+        itemName: 'もっちりみるくわらび　宇治抹茶',
+        itemPrice: '250円（税込270円）',
+        itemImage:
+          'https://img.7api-01.dp1.sej.co.jp/item-image/110786/10BB09D1D78140DFEBE4BA73FE45E3AE.jpg',
+        itemHref: 'https://www.sej.co.jp/products/a/item/110786/kanto/',
+        storeType: 'SevenEleven',
+        metadata: { isNew: true, releasePeriod: 'this_week' },
+      },
+    ];
+
+    // act
+    const result = sweetsApiService.metadataReleasePeriodConvert(sweets);
+
+    // assert
+    expect(result).toEqual([
+      {
+        itemName: 'バニラビーンズ使用　　黄金色スイートポテト',
+        itemPrice: '198円（税込213.84円）',
+        itemImage:
+          'https://img.7api-01.dp1.sej.co.jp/item-image/110940/08496C575DD16E99DAC59982CB751B10.jpg',
+        itemHref: 'https://www.sej.co.jp/products/a/item/110940/kanto/',
+        storeType: 'SevenEleven',
+        metadata: { isNew: true, releasePeriod: 'next_week' },
+      },
+      {
+        itemName: 'グリコ　　　　　　　　Ｂｉｇプッチンプリン',
+        itemPrice: '165円（税込178.20円）',
+        itemImage:
+          'https://img.7api-01.dp1.sej.co.jp/item-image/111013/07B520E7AE72067E2EB30318E3E0C7DB.jpg',
+        itemHref: 'https://www.sej.co.jp/products/a/item/111013/kanto/',
+        storeType: 'SevenEleven',
+        metadata: { isNew: true, releasePeriod: 'next_week' },
+      },
+      {
+        itemName: 'もっちりみるくわらび　宇治抹茶',
+        itemPrice: '250円（税込270円）',
+        itemImage:
+          'https://img.7api-01.dp1.sej.co.jp/item-image/110786/10BB09D1D78140DFEBE4BA73FE45E3AE.jpg',
+        itemHref: 'https://www.sej.co.jp/products/a/item/110786/kanto/',
+        storeType: 'SevenEleven',
+        metadata: { isNew: true, releasePeriod: 'next_week' },
+      },
+    ]);
   });
 });
