@@ -138,6 +138,7 @@ const messageEvent = async (
         // 新商品のmessageの場合
         if (messageDetail.productType === 'newProducts') {
           // ローディングアニメーションを表示
+          loggingService.log('/webhook', '新商品表示メッセージを受信');
           await lineService.loadingAnimation(webhookEventHandlers.userId, accessToken);
           const sweets = await sweetsService.getStoreAllSweets(
             c.env.HONO_SWEETS,
@@ -152,11 +153,21 @@ const messageEvent = async (
               webhookEventHandlers.replyToken,
               accessToken,
             );
-            loggingService.log('/webhook', '新商品メッセージの送信を終了します。');
             return;
           }
 
           const newSweets = sweetsService.filterNewSweets(sweets);
+          if (!newSweets) {
+            const textMessage = lineService.createTextMessage(
+              Constants.MessageConstants.NOT_SWEETS_MESSAGE,
+            );
+            await lineService.replyMessage<TextMessage>(
+              textMessage,
+              webhookEventHandlers.replyToken,
+              accessToken,
+            );
+            return;
+          }
           const carouselMessage = lineService.createCarouselMessage(newSweets);
           const response = await lineService.replyMessage<FlexMessage>(
             carouselMessage,

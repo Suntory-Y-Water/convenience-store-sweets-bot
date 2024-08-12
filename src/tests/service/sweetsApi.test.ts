@@ -164,6 +164,17 @@ describe('sweetsApi tests', () => {
     expect(result).toBe('ダブルクリームサンド（ホイップ&カスタード）');
   });
 
+  test('parseName test encode &eacute;', () => {
+    // arrange
+    const text = 'Uchi Caf&eacute;×猿田彦珈琲　カフェラテどらもっち';
+
+    // act
+    const result = sweetsApiService.parseName(text);
+
+    // assert
+    expect(result).toBe('Uchi Café×猿田彦珈琲　カフェラテどらもっち');
+  });
+
   test('isNewProductTextString tests', () => {
     // arrange
     const parsingText = '2024年06月18日（火）以降順次発売';
