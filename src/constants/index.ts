@@ -26,6 +26,9 @@ export class Constants {
     /** セブンイレブンの和菓子ページ */
     sevenElevenJapaneseSweetsUrl:
       'https://www.sej.co.jp/products/a/cat/060010020000000/kanto/1/l100/',
+    /** セブンイレブンの来週の新商品ページ */
+    sevenElevenNextWeekUrl:
+      'https://www.sej.co.jp/products/a/nextweek/area/kanto/1/l100/',
     /** ファミリーマートの洋菓子ページ */
     familyMartUrl: 'https://www.family.co.jp/goods/dessert.html',
     /** ファミリーマートの和菓子ページ */

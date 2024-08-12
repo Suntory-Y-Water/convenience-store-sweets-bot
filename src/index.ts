@@ -208,6 +208,7 @@ const messageEvent = async (
 export const scheduledEvent = async (env: Bindings) => {
   const sweetsService = container.get<ISweetsService>(TYPES.SweetsService);
   const sweetsApiService = container.get<ISweetsApiService>(TYPES.SweetsApiService);
+  const loggingService = container.get<ILoggingService>(TYPES.LoggingService);
   const urlsParams = [
     {
       url: Constants.ConvenienceStoreItemUrl.sevenElevenWesternSweetsUrl,
@@ -248,6 +249,31 @@ export const scheduledEvent = async (env: Bindings) => {
     const sweetsData = await sweetsApiService.getSweetsDetail(sweetsDetailParams);
     allSweetsData.push(...sweetsData);
   }
+
+  const urlsParamsNewProducts = {
+    url: Constants.ConvenienceStoreItemUrl.sevenElevenNextWeekUrl,
+    params: Constants.ConvenienceStoreDetailParams.SEVEN_ELEVEN,
+  };
+
+  // 全てのURLに対して順番にデータを取得
+  const response = await sweetsApiService.fetchSweetsUrl(
+    urlsParamsNewProducts.url,
+    headers,
+  );
+  const newSweetsDetailParams = {
+    responseHtml: response,
+    ...urlsParamsNewProducts.params,
+  };
+  const sweetsData = await sweetsApiService.getSweetsDetail(newSweetsDetailParams);
+  const filteredSweetsData = sweetsApiService.filterSevenElevenNewSweets(sweetsData);
+
+  // セブンイレブンの新商品がある場合のみ、配列に新商品情報を追加する
+  if (filteredSweetsData) {
+    loggingService.log('scheduledEvent', '来週の新商品', filteredSweetsData);
+    const result = sweetsApiService.metadataReleasePeriodConvert(filteredSweetsData);
+    allSweetsData.push(...result);
+  }
+
   // KVに保存する前に既存のデータを全て削除
   await sweetsService.deleteSweets(env.HONO_SWEETS, Constants.PREFIX);
 
