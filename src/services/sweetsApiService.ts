@@ -73,6 +73,20 @@ export interface ISweetsApiService {
     isNew?: boolean;
     releasePeriod?: ReleasePeriod;
   };
+
+  /**
+   * @description セブンイレブンの新商品ページからスイーツの新商品(商品IDが11から始まるもの)をフィルタリングして返す
+   * @param {Sweets[]} sweets セブンイレブンの新商品ページから取得したSweets型の配列
+   * @return {*}  {(Sweets[] | null)}
+   */
+  filterSevenElevenNewSweets(sweets: Sweets[]): Sweets[] | null;
+
+  /**
+   * @description Sweets型の配列から今週の新商品を来週の新商品に変換する(セブンイレブンの新商品専用)
+   * @param {Sweets[]} sweets
+   * @return {*}  {Sweets[]}
+   */
+  metadataReleasePeriodConvert(sweets: Sweets[]): Sweets[];
 }
 
 @injectable()
@@ -116,7 +130,6 @@ export class SweetsApiService implements ISweetsApiService {
     return classes ? classes.includes(className) : false;
   };
 
-  // TODO: あまりこの実装は美しくない
   isNewProductElement = (
     element: Element,
   ): { isNew?: boolean; releasePeriod?: ReleasePeriod } => {
@@ -128,7 +141,6 @@ export class SweetsApiService implements ISweetsApiService {
     return {};
   };
 
-  // TODO: あまりこの実装は美しくない
   isNewProductTextString = (
     text: string,
   ): { isNew?: boolean; releasePeriod?: ReleasePeriod } => {
@@ -238,4 +250,31 @@ export class SweetsApiService implements ISweetsApiService {
       );
     }
   };
+
+  filterSevenElevenNewSweets(sweets: Sweets[]): Sweets[] | null {
+    const filteredSweets: Sweets[] = [];
+
+    for (const sweet of sweets) {
+      // 商品URLからid部分を取得
+      const itemCode = sweet.itemHref.split('/')[6];
+
+      // idの先頭2桁が "11" であるかを確認
+      if (itemCode.startsWith('11')) {
+        filteredSweets.push(sweet);
+      }
+    }
+
+    // 商品が1件以上存在する場合、配列を返却。それ以外は null を返却
+    return filteredSweets.length > 0 ? filteredSweets : null;
+  }
+
+  // metadata: { isNew: true, releasePeriod: 'this_week' },の`this_week`を`next_week`に変換する
+  metadataReleasePeriodConvert(sweets: Sweets[]) {
+    return sweets.map((sweet) => {
+      if (sweet.metadata?.releasePeriod === 'this_week') {
+        sweet.metadata.releasePeriod = 'next_week';
+      }
+      return sweet;
+    });
+  }
 }
