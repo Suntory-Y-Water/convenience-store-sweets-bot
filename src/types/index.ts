@@ -3,6 +3,7 @@ export type Bindings = {
   readonly CHANNEL_ACCESS_TOKEN: string;
   readonly API_URL: string;
   readonly BEARER_TOKEN: string;
+  readonly SWEETS_DB: D1Database;
 };
 // TODO: このSweetsStoreTypeの型使用は問題ないのか
 export interface ItemDetailSelector {

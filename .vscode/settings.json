@@ -17,5 +17,21 @@
   },
   "[ejs]": {
     "editor.formatOnSave": false
-  }
+  },
+  "[sql]": {
+    "editor.defaultFormatter": "inferrinizzard.prettier-sql-vscode"
+  },
+  "Prettier-SQL.commaPosition": "after", // Where to place commas for SELECT and GROUP BY clauses
+  "Prettier-SQL.denseOperators": false, // Whether to strip whitespace around operators such as + or >=
+  "Prettier-SQL.ignoreTabSettings": false, // Whether to ignore VSCode user/workspace settings for tabSize and insertSpaces
+  "Prettier-SQL.expressionWidth": 50, // Number of characters allowed in each line before breaking
+  "Prettier-SQL.indentStyle": "standard", // Switched between standard keyword positioning vs maintaining a central space column
+  "Prettier-SQL.insertSpacesOverride": true, // Overrides insertSpaces if Prettier-SQL.ignoreTabSettings is enabled
+  "Prettier-SQL.keywordCase": "preserve", // Whether to print keywords in ALL CAPS or lowercase
+  "Prettier-SQL.linesBetweenQueries": 1, // How many newlines to place between each query / statement
+  "Prettier-SQL.logicalOperatorNewline": "before", // Whether to break before or after AND and OR
+  "Prettier-SQL.newlineBeforeSemicolon": false, // Whether to place semicolon on its own line or on previous line
+  "Prettier-SQL.SQLFlavourOverride": "sql", // Uses custom SQL Flavour to format sql files. Use this if you are using the Microsoft PostgreSQL or MSSQL Extensions since they do not provide a new language ID for VSCode.
+  "Prettier-SQL.tabSizeOverride": 2, // Overrides tabSize if Prettier-SQL.ignoreTabSettings is enabled
+  "Prettier-SQL.tabulateAlias": false // Whether to right-align aliases to the longest line in the SELECT clause
 }

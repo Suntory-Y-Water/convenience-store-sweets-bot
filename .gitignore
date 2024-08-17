@@ -11,3 +11,4 @@ bun.lockb
 
 .ngrok
 src/__snapshots__
+.env.*
